@@ -2,35 +2,47 @@ import streamlit as st
 import random
 import io
 import os
+import urllib.request
 from PIL import Image
 
 # ---- تسجيل الخط العربي بأمان ----
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-# توحيد اسم الخط بحالة أحرف ثابتة ومطابقة
+# توحيد اسم الخط بحالة أحرف ثابتة ومطابقة تماماً
 FONT_NAME = 'DejaVuSans'
+FONT_FILE = 'DejaVuSans.ttf'
 
-font_loaded = False
-possible_paths = [
-    "DejaVuSans.ttf",  # إذا كان الملف مرفوعاً في مجلد المشروع (موصى به للـ Cloud)
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # مسار لينكس الافتراضي
-    "C:\\Windows\\Fonts\\Arial.ttf"  # مسار ويندوز الاحتياطي
-]
-
-for path in possible_paths:
-    if os.path.exists(path):
+# دالة لتحميل الخط من الإنترنت إذا لم يكن موجوداً في السيرفر
+def download_font():
+    if not os.path.exists(FONT_FILE):
+        # رابط مباشر وموثوق لتحميل خط DejaVuSans
+        url = "https://github.com/googlefonts/dejavu-fonts/raw/master/resources/fonts/ttf/DejaVuSans.ttf"
         try:
-            pdfmetrics.registerFont(TTFont(FONT_NAME, path))
-            font_loaded = True
-            break
+            urllib.request.urlretrieve(url, FONT_FILE)
         except:
-            continue
+            # رابط احتياطي في حال فشل الأول
+            fallback_url = "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/DejaVuSans.ttf"
+            try:
+                urllib.request.urlretrieve(fallback_url, FONT_FILE)
+            except:
+                pass
 
-# إذا فشلت جميع المسارات، نستخدم الخط الافتراضي كحل أخير لتجنب الانهيار الكامل
+# تشغيل دالة التحميل قبل كل شيء
+download_font()
+
+# تسجيل الخط في ReportLab باسم موحد
+font_loaded = False
+if os.path.exists(FONT_FILE):
+    try:
+        pdfmetrics.registerFont(TTFont(FONT_NAME, FONT_FILE))
+        font_loaded = True
+    except:
+        pass
+
+# إذا فشلت جميع الحلول، نستخدم الخط الافتراضي كحل أخير لتجنب الانهيار
 if not font_loaded:
     try:
-        # تسجيل Helvetica كاسم مستعار لـ DejaVuSans لتفادي خطأ تحديد العائلة
         pdfmetrics.registerFont(TTFont(FONT_NAME, 'Helvetica'))
     except:
         pass
@@ -204,7 +216,7 @@ motivational_quotes = [
     "لا تستسلمين هسة، إنتِ قطعتي شوط كبير وما بقى إلا القليل، شدي حيلج أكثر.",
     "الأحلام ما تتحقق بالأماني، تتحقق بالتعب والسهر والدراسة، وأنتِ دا تبذلين كل جهدج.",
     "أنتِ ذكية ومميزة، ولا تخلين درجات أو امتحانات تقلل من قيمتكِ الحقيقية وقدراتج.",
-    "كلما حسيتي بضيق، تذكري اللحظة اللي تجيج بيها النتيجة وتشوفين كلمة 'ناجحة'.",
+    "كلما حسيتي بتعب، تذكري اللحظة اللي تجيج بيها النتيجة وتشوفين كلمة 'ناجحة'.",
     "الراحة بعد التعب طعمها يجنن، فتعبوا هسة علمود ترتاحون وتفرحون بعدين.",
     "حبيبتي، خلي راسج مرفوع دايمًا، أنتِ دا تسوين شي عظيم لنفسج ولمستقبلج.",
     "ثقتي بيج ما إلها حدود، وأدري زين إن الصعوبات ما توكف بوجهج أبدًا.",
@@ -272,7 +284,7 @@ motivational_quotes = [
     "خلي هدفج واضح كدام عيونج، ولا تخلين أي شي يشتت انتباهج عنه.",
     "أنتِ تستحقين تفرحين وتفتخرين بروحج، فابذلي كل اللي تكدرين عليه هسة.",
     "الدراسة هي سلاحج اللي يخليج قوية بكل مكان تروحين بيه، فتمسكي بيه.",
-    "كلما زاد التحدي، زادت متعة الوصول والنجاح، فاستمتعي برحلتج للقمة.",
+    "كلما زاد التحدي، زادت متعة الوصول والنجاح, فاستمتعي برحلتج للقمة.",
     "أنتِ أملي وفخري، وأدري إنج راح ترفعين راسي وراس أهلج بنجاحج الكبير.",
     "تذكري دايمًا: 'ما ضاقت إلا لتفرج'، وكل هالتعب راح يتحول لراحة وفرحة جبيرة."
 ]
@@ -499,7 +511,7 @@ with tabs[3]:
                     topMargin=40, bottomMargin=40
                 )
 
-                # استخدام الاسم الثابت المعرف في الأعلى FONT_NAME
+                # استخدام FONT_NAME المطابق لاسم الخط المسجل في الأعلى
                 arabic_style = ParagraphStyle(
                     name='ArabicStyle',
                     fontName=FONT_NAME,
