@@ -5,17 +5,23 @@ import os
 import urllib.request
 from PIL import Image
 
-# ---- تسجيل الخط العربي بأمان لتجنب حساسية الأحرف ----
+# المكتبات المضمونة لمعالجة النصوص العربية
+import arabic_reshaper
+from bidi.algorithm import get_display
+
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.pagesizes import A4
 
-FONT_NAME_1 = 'DejaVuSans'
-FONT_NAME_2 = 'dejavusans'
-FONT_FILE = 'DejaVuSans.ttf'
+# ====== إعداد الخط بأمان وبدون Fallback ======
+FONT_NAME = "DejaVuSans"
+FONT_FILE = "DejaVuSans.ttf"
 
 def download_font():
     if not os.path.exists(FONT_FILE):
-        url = "https://github.com/googlefonts/dejavu-fonts/raw/master/resources/fonts/ttf/DejaVuSans.ttf"
+        url = "https://raw.githubusercontent.com/dejavu-fonts/dejavu-fonts/master/ttf/DejaVuSans.ttf"
         try:
             urllib.request.urlretrieve(url, FONT_FILE)
         except:
@@ -29,97 +35,15 @@ download_font()
 
 if os.path.exists(FONT_FILE):
     try:
-        pdfmetrics.registerFont(TTFont(FONT_NAME_1, FONT_FILE))
-        pdfmetrics.registerFont(TTFont(FONT_NAME_2, FONT_FILE))
-    except:
-        pass
-else:
-    try:
-        pdfmetrics.registerFont(TTFont(FONT_NAME_1, 'Helvetica'))
-        pdfmetrics.registerFont(TTFont(FONT_NAME_2, 'Helvetica'))
+        pdfmetrics.registerFont(TTFont(FONT_NAME, FONT_FILE))
     except:
         pass
 
-# ---- دالة تشكيل النص العربي ----
-ARABIC_RESHAPER_MAP = {
-    '\u0627': ('\uFE8D', '\uFE8E', '\uFE8D', '\uFE8E'),
-    '\u0628': ('\uFE8F', '\uFE90', '\uFE91', '\uFE92'),
-    '\u062A': ('\uFE95', '\uFE96', '\uFE97', '\uFE98'),
-    '\u062B': ('\uFE99', '\uFE9A', '\uFE9B', '\uFE9C'),
-    '\u062C': ('\uFE9D', '\uFE9E', '\uFE9F', '\uFEA0'),
-    '\u062D': ('\uFEA1', '\uFEA2', '\uFEA3', '\uFEA4'),
-    '\u062E': ('\uFEA5', '\uFEA6', '\uFEA7', '\uFEA8'),
-    '\u062F': ('\uFEA9', '\uFEAA', '\uFEA9', '\uFEAA'),
-    '\u0630': ('\uFEAB', '\uFEAC', '\uFEAB', '\uFEAC'),
-    '\u0631': ('\uFEAD', '\uFEAE', '\uFEAD', '\uFEAE'),
-    '\u0632': ('\uFEAF', '\uFEB0', '\uFEAF', '\uFEB0'),
-    '\u0633': ('\uFEB1', '\uFEB2', '\uFEB3', '\uFEB4'),
-    '\u0634': ('\uFEB5', '\uFEB6', '\uFEB7', '\uFEB8'),
-    '\u0635': ('\uFEB9', '\uFEBA', '\uFEBB', '\uFEBC'),
-    '\u0636': ('\uFEBD', '\uFEBE', '\uFEBF', '\uFEC0'),
-    '\u0637': ('\uFEC1', '\uFEC2', '\uFEC3', '\uFEC4'),
-    '\u0638': ('\uFEC5', '\uFEC6', '\uFEC7', '\uFEC8'),
-    '\u0639': ('\uFEC9', '\uFECA', '\uFECB', '\uFECC'),
-    '\u063A': ('\uFECD', '\uFECE', '\uFECF', '\uFED0'),
-    '\u0641': ('\uFED1', '\uFED2', '\uFED3', '\uFED4'),
-    '\u0642': ('\uFED5', '\uFED6', '\uFED7', '\uFED8'),
-    '\u0643': ('\uFED9', '\uFEDA', '\uFEDB', '\uFEDC'),
-    '\u0644': ('\uFEDD', '\uFEDE', '\uFEDF', '\uFEE0'),
-    '\u0645': ('\uFEE1', '\uFEE2', '\uFEE3', '\uFEE4'),
-    '\u0646': ('\uFEE5', '\uFEE6', '\uFEE7', '\uFEE8'),
-    '\u0647': ('\uFEE9', '\uFEEA', '\uFEEB', '\uFEEC'),
-    '\u0648': ('\uFEED', '\uFEEE', '\uFEED', '\uFEEE'),
-    '\u064A': ('\uFEF1', '\uFEF2', '\uFEF3', '\uFEF4'),
-    '\u0629': ('\uFE93', '\uFE94', '\uFE93', '\uFE94'),
-    '\u0649': ('\uFEEF', '\uFEF0', '\uFEEF', '\uFEF0'),
-    '\u0622': ('\uFE81', '\uFE82', '\uFE81', '\uFE82'),
-    '\u0623': ('\uFE83', '\uFE84', '\uFE83', '\uFE84'),
-    '\u0625': ('\uFE87', '\uFE88', '\uFE87', '\uFE88'),
-    '\u0626': ('\uFE89', '\uFE8A', '\uFE8B', '\uFE8C'),
-    '\u0621': ('\uFE80', '\uFE80', '\uFE80', '\uFE80'),
-    '\u0624': ('\uFE85', '\uFE86', '\uFE85', '\uFE86'),
-}
-NON_JOINING_NEXT = {
-    '\u0627', '\u062F', '\u0630', '\u0631', '\u0632', '\u0648',
-    '\u0622', '\u0623', '\u0625', '\u0624', '\u0629', '\u0649'
-}
-
-def _reshape_word(word):
-    chars = list(word)
-    n = len(chars)
-    result = []
-    for i, char in enumerate(chars):
-        if char not in ARABIC_RESHAPER_MAP:
-            result.append(char)
-            continue
-        prev_joins = (i > 0 and chars[i-1] in ARABIC_RESHAPER_MAP and chars[i-1] not in NON_JOINING_NEXT)
-        next_joins = (i < n-1 and chars[i+1] in ARABIC_RESHAPER_MAP and char not in NON_JOINING_NEXT)
-        forms = ARABIC_RESHAPER_MAP[char]
-        if prev_joins and next_joins:
-            result.append(forms[3])
-        elif prev_joins:
-            result.append(forms[1])
-        elif next_joins:
-            result.append(forms[2])
-        else:
-            result.append(forms[0])
-    return ''.join(reversed(result))
-
+# ------ دالة تشكيل النص العربي ------
 def prepare_arabic(text):
-    lines = text.split('\n')
-    result_lines = []
-    for line in lines:
-        words = line.split(' ')
-        processed = []
-        for w in words:
-            if any('\u0600' <= c <= '\u06FF' for c in w):
-                processed.append(_reshape_word(w))
-            else:
-                processed.append(w)
-        result_lines.append(' '.join(reversed(processed)))
-    return '\n'.join(result_lines)
+    return get_display(arabic_reshaper.reshape(text))
 
-# ====== إعدادات الصفحة ======
+# ====== إعدادات الصفحة والهوية البصرية ======
 st.set_page_config(page_title="منصة الإلهام وتحويل الملفات | 247", layout="wide", page_icon="✨")
 
 st.markdown("""
@@ -146,21 +70,11 @@ st.markdown("""
         padding: 25px; border-radius: 15px; border: 1px solid #ff2e63; text-align: right;
         margin-bottom: 20px; color: #ffe3ed; direction: rtl; line-height: 1.8;
     }
-    .quran-text {
-        font-size: 16px; color: #ffaa00; line-height: 1.8; font-weight: bold; text-align: right; direction: rtl;
-    }
-    .motivational-text {
-        font-size: 17px; color: #00ffcc; line-height: 1.6; font-style: normal; text-align: right; direction: rtl;
-    }
-    .warm-advice-text {
-        font-size: 18px; color: #ff9f80; font-weight: normal; text-align: right; direction: rtl; line-height: 1.8;
-    }
-    .love-letter-text {
-        font-size: 19px; color: #ff5e7e; font-weight: normal; text-align: right; direction: rtl; line-height: 1.8; font-style: italic;
-    }
-    .dua-header {
-        color: #00ffcc; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #00ffcc; padding-bottom: 8px;
-    }
+    .quran-text { font-size: 16px; color: #ffaa00; line-height: 1.8; font-weight: bold; text-align: right; direction: rtl; }
+    .motivational-text { font-size: 17px; color: #00ffcc; line-height: 1.6; text-align: right; direction: rtl; }
+    .warm-advice-text { font-size: 18px; color: #ff9f80; text-align: right; direction: rtl; line-height: 1.8; }
+    .love-letter-text { font-size: 19px; color: #ff5e7e; text-align: right; direction: rtl; line-height: 1.8; font-style: italic; }
+    .dua-header { color: #00ffcc; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #00ffcc; padding-bottom: 8px; }
     .code-badge { font-size: 14px; background-color: #00ffcc; color: #0e1117; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
@@ -278,7 +192,7 @@ variable_verses = [
     "﴿وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ ۚ عَلَيْهِ تَوَكَّلْتُ﴾", "﴿وَآتَاكُم مِّن كُلِّ مَا سَأَلْتُمُوهُ﴾", "﴿وَمَا رَبُّكَ بِظَلَّامٍ لِّلْعَبِيدِ﴾",
     "﴿إِنَّ رَبِّي لَطِيفٌ لِّمَا يَشَاءُ﴾", "﴿وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ﴾", "﴿إِنَّ اللَّهَ مَعَ الَّذِينَ اتَّقَوا﴾",
     "﴿لَا تَدْرِي لَعَلَّ اللَّهَ يُحْدِثُ بَعْدَ ذَٰلِكَ أَمْرًا﴾", "﴿وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ﴾", "﴿وَاللَّهُ يَعْلَمُ وَأَنتُمْ لَا تَعْلَمُونَ﴾",
-    "﴿قَدْ جَعَلَ اللَّهُ لِكُلِّ شَيْءٍ قَدْرًا﴾", "﴿فَسَيَكْفِيكَهُمُ اللَّهُ ۚ وَهُوَ السَّمِيعُ الْعَلِيمُ﴾", "﴿رَبِّ لَا تَذَرْنِي فَرْدًا﴾",
+    "﴿قَدْ جَعَلَ اللَّهُ لِكلِّ شَيْءٍ قَدْرًا﴾", "﴿فَسَيَكْفِيكَهُمُ اللَّهُ ۚ وَهُوَ السَّمِيعُ الْعَلِيمُ﴾", "﴿رَبِّ لَا تَذَرْنِي فَرْدًا﴾",
     "﴿إِنَّ اللَّهَ لَا يُضِيعُ أَجْرَ الْمُحْسِنِينَ﴾", "﴿وَرَحْمَتِي وَسِعَتْ كُلَّ شَيْءٍ﴾", "﴿وَإِن تَعُدُّوا نِعْمَةَ اللَّهِ لَا تُحْصُوهَا﴾",
     "﴿وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ﴾", "﴿فَاصْبِرْ إِنَّ وَعْدَ اللَّه حق﴾", "﴿وَمَا كَانَ اللَّهُ لِيُعْجِزَهُ مِن شَيْءٍ﴾",
     "﴿وَسَيَجْزِي اللَّهُ الشَّاكِرِينَ﴾", "﴿إِنَّا لَا نُضِيعُ أَجْرَ مَنْ أَحْسَنَ عَمَلًا﴾", "﴿وَاللَّهُ يَخْتَصُّ بِرَحْمَتِهِ مَن يَشَاءُ﴾",
@@ -344,57 +258,65 @@ with tabs[2]:
 
 with tabs[3]:
     st.markdown("### 📂 تحويل النصوص والصور إلى ملف PDF")
-    st.info("✅ يدعم الآن النص العربي بشكل صحيح (الحروف متصلة واتجاه RTL)")
+    st.info("✅ يدعم الآن النصوص العربية بشكل صحيح (الحروف متصلة واتجاه RTL)")
     
     text_input = st.text_area("أدخل النص الذي تريد إضافته إلى ملف PDF:", height=150, placeholder="اكتب النص هنا...")
     uploaded_images = st.file_uploader("قم برفع الصور (JPG, PNG) لدمجها في الـ PDF:", type=["jpg", "jpeg", "png", "webp"], accept_multiple_files=True)
 
+    # دالة التوليد المضمونة والحديثة
+    def create_pdf(text_in, img_files):
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40
+        )
+        style = ParagraphStyle(
+            name="ArabicStyle", fontName=FONT_NAME, fontSize=14, leading=24, alignment=2
+        )
+        story = []
+
+        if text_in.strip():
+            processed = prepare_arabic(text_in)
+            story.append(Paragraph(processed.replace("\n", "<br/>"), style))
+            story.append(Spacer(1, 20))
+
+        if img_files:
+            for img_file in img_files:
+                try:
+                    img = Image.open(img_file)
+                except:
+                    continue
+                
+                buf = io.BytesIO()
+                img.save(buf, format="PNG")
+                buf.seek(0)
+                
+                w, h = img.size
+                ratio = h / float(w)
+                story.append(RLImage(buf, width=450, height=450 * ratio))
+                story.append(Spacer(1, 20))
+
+        if len(story) == 0:
+            raise ValueError("لا يوجد نص أو صور لإنشاء الملف!")
+
+        doc.build(story)
+        buffer.seek(0)
+        return buffer
+
     if st.button("توليد ملف الـ PDF"):
-        if not text_input and not uploaded_images:
+        if not text_input.strip() and not uploaded_images:
             st.error("الرجاء إدخال نص أو رفع صورة واحدة على الأقل!")
         else:
             try:
-                from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage
-                from reportlab.lib.styles import ParagraphStyle
-                from reportlab.lib.pagesizes import A4
-
-                pdf_buffer = io.BytesIO()
-                doc = SimpleDocTemplate(pdf_buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
-
-                arabic_style = ParagraphStyle(name='ArabicStyle', fontName='dejavusans', fontSize=13, leading=22, alignment=2, rightIndent=5)
-                story = []
-
-                if text_input:
-                    for line in text_input.split('\n'):
-                        if line.strip():
-                            processed_line = prepare_arabic(line.strip())
-                            story.append(Paragraph(processed_line, arabic_style))
-                            story.append(Spacer(1, 6))
-                    story.append(Spacer(1, 15))
-
-                if uploaded_images:
-                    for uploaded_img in uploaded_images:
-                        img = Image.open(uploaded_img)
-                        img_width, img_height = img.size
-                        aspect = img_height / float(img_width)
-                        display_width = 480
-                        display_height = 480 * aspect
-
-                        img_buf = io.BytesIO()
-                        img.save(img_buf, format="PNG")
-                        img_buf.seek(0)
-
-                        rl_img = RLImage(img_buf, width=display_width, height=display_height)
-                        story.append(rl_img)
-                        story.append(Spacer(1, 15))
-
-                doc.build(story)
-                pdf_data = pdf_buffer.getvalue()
-
+                pdf = create_pdf(text_input, uploaded_images)
                 st.success("✅ تم إنشاء ملف الـ PDF بنجاح!")
-                st.download_button(label="⬇️ اضغط هنا لتنزيل ملف الـ PDF", data=pdf_data, file_name="Inspiration_Doc.pdf", mime="application/pdf")
+                st.download_button(
+                    label="⬇️ اضغط هنا لتنزيل ملف الـ PDF",
+                    data=pdf,
+                    file_name="Inspiration_Doc.pdf",
+                    mime="application/pdf"
+                )
             except Exception as e:
-                st.error(f"حدث خطأ أثناء إنشاء الملف: {e}")
+                st.exception(e)
 
 st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #888888;'>تم التطوير بواسطة شيماء علي عبد الحسين | v1.3 | 247</p>", unsafe_allow_html=True)
