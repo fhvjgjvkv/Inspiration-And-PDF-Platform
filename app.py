@@ -19,33 +19,33 @@ from reportlab.lib.utils import ImageReader
 # ====== إعدادات الصفحة والهوية البصرية ======
 st.set_page_config(page_title="منصة الإلهام وتحويل الملفات | 247", layout="wide", page_icon="✨")
 
-FONT_NAME = "DejaVuSans"
-FONT_FILE = "DejaVuSans.ttf"
+# استخدام خط Amiri الموثوق لدعم اللغة العربية في ReportLab
+FONT_NAME = "Amiri"
+FONT_FILE = "Amiri-Regular.ttf"
 
 # ====== دالة تحميل وتسجيل الخط بأمان تام ومنع الانهيار ======
 def load_fonts():
     if not os.path.exists(FONT_FILE):
-        # روابط موثوقة ومجربة لتحميل الخط
+        # روابط مباشرة ومستقرة لتحميل الخط
         urls = [
-            "https://raw.githubusercontent.com/dejavu-fonts/dejavu-fonts/master/ttf/DejaVuSans.ttf",
-            "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/DejaVuSans.ttf"
+            "https://github.com/googlefonts/amiri/raw/main/fonts/ttf/Amiri-Regular.ttf",
+            "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto.ttf"  # احتياطي
         ]
         for url in urls:
             try:
-                # استخدام User-Agent لتجنب حظر السيرفر أثناء التحميل
+                # استخدام User-Agent لتجنب الحظر أثناء التحميل بالسيرفر
                 req = urllib.request.Request(
                     url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
                 )
-                with urllib.request.urlopen(req, timeout=10) as response, open(FONT_FILE, 'wb') as out_file:
+                with urllib.request.urlopen(req, timeout=15) as response, open(FONT_FILE, 'wb') as out_file:
                     out_file.write(response.read())
-                break  # تم التحميل بنجاح من أحد الروابط
+                break  # تم التحميل بنجاح
             except Exception:
                 continue
 
     # تسجيل الخط في ReportLab بعد التأكد من وجود الملف
     if os.path.exists(FONT_FILE):
         try:
-            # مسح الـ cache القديم للخطوط إن وُجد لتفادي أخطاء الذاكرة
             pdfmetrics.registerFont(TTFont(FONT_NAME, FONT_FILE))
             return FONT_NAME
         except Exception:
@@ -58,11 +58,15 @@ ACTIVE_FONT = load_fonts()
 
 # ------ دالة تشكيل النص العربي مع تدعيم الـ RTL ------
 def prepare_arabic(text):
+    if not text.strip():
+        return ""
+    # إعادة تشكيل الحروف لتكون متصلة
     reshaped_text = arabic_reshaper.reshape(text)
+    # تعديل اتجاه النص من اليمين إلى اليسار (RTL)
     bidi_text = get_display(reshaped_text)
-    return f"\u202B{bidi_text}\u202C"
+    return bidi_text
 
-# ====== تحسين الأداء عبر Caching لبنك البيانات ======
+# ====== بنك العبارات والبيانات الكامل ======
 @st.cache_data
 def load_motivational_quotes():
     return [
@@ -112,7 +116,7 @@ def load_motivational_quotes():
         "خلي هدفج واضح كدام عيونج ولا تلتفتين لأي شي ثاني.",
         "كل خطوة تمشيها اليوم هي استثمار لمستقبلج المشرق.", 
         "أنتِ مبدعة وتستحقين الأفضل دايمًا، كملي ولا تتراجعين.",
-        "تعب اليوم هو اللي بيصنع راحتج بكرة.", 
+        "تعبج اليوم هو اللي بيصنع راحتج بكرة.", 
         "أنتِ قادرة على تغيير واقعج بجهدج وإصرارج.",
         "لا تستهينين بأي مجهود تسوينه، كل شي محسوب.", 
         "الإصرار هو سر النجاح، وأنتِ مليانة إصرار.",
@@ -144,7 +148,7 @@ def load_motivational_quotes():
         "أنتِ مميزة، ونجاحج راح يكون مميز مثلج.",
         "كل تعب يمر بيج هو دليل إنج دا تسوين شي عظيم.", 
         "خلي أملج بالله جبير، وهو ماراح يخيبج.",
-        "أنتِ كدها اليوم وباجر وكل يوم، لا تشكين بقدراتج أبدًا.", 
+        "أنتِ كدها اليوم وباجر وكل يوم, لا تشكين بقدراتج أبدًا.", 
         "النجاح يبدأ بخطوة، وأنتِ مشيتي خطوات هواية.",
         "كملي طريقج وعيونج على النجوم، لا تباعين تحت.", 
         "أنتِ تصنعين المستحيل بإصرارج وعزيمتج.",
@@ -223,12 +227,12 @@ def load_all_verses():
         "﴿وَاصْبِرْ لِحُكْمِ رَبِّكَ فَإِنَّكَ بِأَعْيُنِنَا﴾", "﴿قُلْ هُوَ اللَّهُ أَحَدٌ﴾", "﴿اللَّهُ الصَّمَدُ﴾",
         "﴿قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ﴾", "﴿وَتَوَكَّلْ عَلَى الْحَيِّ الَّذِي لَا يَمُوتُ﴾", "﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾",
         "﴿رَبِّ اشْرَحْ لِي صَدْرِي﴾", "﴿وَيَسِّرْ لِي أَمْرِي﴾", "﴿إِنَّ اللَّهَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ﴾",
-        "﴿وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ﴾", "﴿فَاصْبِرْ صَبْرًا جَمِيلًا﴾", "﴿وَاصْبِرْ وَمَا صَبْرُكَ إِلَّا بِاللَّهِ﴾",
+        "﴿وَوقالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ﴾", "﴿فَاصْبِرْ صَبْرًا جَمِيلًا﴾", "﴿وَاصْبِرْ وَمَا صَبْرُكَ إِلَّا بِاللَّهِ﴾",
         "﴿وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ﴾", "﴿وَاللَّهُ مَعَ الصَّابِرِينَ﴾"
     ]
     return fixed, variable
 
-# ====== إدارة الـ Session State وتفادي الـ st.rerun العشوائي ======
+# ====== إدارة الـ Session State ======
 if "daily_quote" not in st.session_state:
     st.session_state.daily_quote = random.choice(load_motivational_quotes())
 if "daily_advice" not in st.session_state:
@@ -328,30 +332,34 @@ with tabs[2]:
 with tabs[3]:
     st.markdown("### 📂 تحويل النصوص والصور إلى ملف PDF")
     
-    # رسالة تنبيه تفاعلية حول الخط الفعلي المستخدم
+    # تنبيه يوضح حالة الخط المستخدم
     if ACTIVE_FONT == "Helvetica":
-        st.warning("⚠️ تعذر تحميل الخط العربي، سيتم استخدام الخط الافتراضي (قد لا يدعم العربية بشكل كامل).")
+        st.error("⚠️ تعذر تحميل الخط العربي. سيتم استخدام الخط الافتراضي (قد لا يدعم الحروف العربية بشكل كامل).")
+    else:
+        st.success("✅ الخط العربي (Amiri) مُحمّل وجاهز لإنشاء الملفات بدقة عالية.")
 
-    text_input = st.text_area("أدخل النص الذي تريد إضافته إلى ملف PDF:", height=150, placeholder="اكتب النص هنا...")
+    text_input = st.text_area("أدخل النص الذي تريد إضافته إلى ملف PDF:", height=150, placeholder="اكتب النص العربي هنا...")
     uploaded_images = st.file_uploader("قم برفع الصور (JPG, PNG) لدمجها في الـ PDF:", type=["jpg", "jpeg", "png", "webp"], accept_multiple_files=True)
 
-    # دالة التوليد المُحسنة والموثوقة
+    # دالة توليد الـ PDF المضمونة
     def create_pdf(text_in, img_files):
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(
             buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40
         )
+        
+        # إعداد ستايل النص العربي وتمرير الخط المفعل
         style = ParagraphStyle(
             name="ArabicStyle", 
             fontName=ACTIVE_FONT, 
-            fontSize=14, 
-            leading=24, 
-            alignment=2
+            fontSize=16, 
+            leading=26, 
+            alignment=2  # محاذاة النص لليمين RTL
         )
         story = []
 
         if text_in.strip():
-            # دمج علامات الـ RTL المضمونة مع تشكيل الحروف
+            # تشكيل النص ومعالجة اتجاه الـ RTL
             processed = prepare_arabic(text_in)
             story.append(Paragraph(processed.replace("\n", "<br/>"), style))
             story.append(Spacer(1, 20))
@@ -370,7 +378,7 @@ with tabs[3]:
                 w, h = img.size
                 ratio = h / float(w)
                 
-                # المعالجة عبر ImageReader لتجنب كسر الصور بالذاكرة
+                # استخدام ImageReader لقراءة الصور بأمان تام
                 img_reader = ImageReader(buf)
                 story.append(RLImage(img_reader, width=450, height=450 * ratio))
                 story.append(Spacer(1, 20))
