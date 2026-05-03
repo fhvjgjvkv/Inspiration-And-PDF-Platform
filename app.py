@@ -7,7 +7,7 @@ st.set_page_config(page_title="منصة الإلهام والتذكير | 247", 
 # ====== بنك البيانات والعبارات ======
 @st.cache_data
 def load_data():
-    # 1. قسم الإلهام (100 عبارة تحفيزية مكتوبة بالكامل)
+    # 1. قسم الإلهام والتذكير (100 عبارة)
     quotes = [
         "تذكري دايمًا إن هذي التعب والمواقف الصعبة هي اللي راح تصنع منكِ إنسانة قوية.",
         "الدراسة هي سلاحكِ وسندكِ بهالدنيا، وكل ساعة تعب وسهر بتخليكِ مستقلة.",
@@ -111,7 +111,7 @@ def load_data():
         "اجعلي من نجاحكِ اليوم بداية لنجاحات أكبر في المستقبل."
     ]
 
-    # 2. قسم النصائح من القلب (40 نصيحة دافئة مكتوبة بالكامل)
+    # 2. قسم النصائح من القلب (40 نصيحة)
     advices = [
         "حبيبتي، لا تقسين على نفسكِ، تعبتي هواية وتستاهلين شوية حنان من ذاتكِ.",
         "لما تحسين الدنيا قفلت بوجهكِ، تعالي ارتاحي واشربي شي دافي.",
@@ -155,7 +155,7 @@ def load_data():
         "دمتِ قوية ومشرقة، ونحن جميعاً فخورون بما تقدمينه وتحققينه."
     ]
 
-    # 3. قسم رسائل الحب (30 رسالة حب واطمئنان مكتوبة بالكامل)
+    # 3. قسم رسائل الحب والاطمئنان (30 رسالة)
     letters = [
         "إلى من أحب وأعشق.. عيونكِ هي أماني بهالدنيا، وكل ما أحس بضيق أتذكر ضحكتكِ وأرتاح.",
         "أنتِ مو بس حبيبتي، أنتِ راحتي وملجئي اللي أهرب له من تعب هالعالم.",
@@ -213,7 +213,7 @@ if "daily_azkar" not in st.session_state: st.session_state.daily_azkar = random.
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-    html, body, [class*="css"] { font-family: 'Cairo', sans-serif; background-color: #0a0c10; }
+    html, body, [class*="css"] { font-family: 'Cairo', sans-serif; background-color: #0a0c10; box-sizing: border-box; }
     @keyframes fadeInUp { from { opacity: 0; transform: translate3d(0, 20px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
     h1 { color: #00ffcc !important; text-align: center; font-weight: 700; text-shadow: 0px 0px 15px rgba(0, 255, 204, 0.4); }
     .stButton>button { 
@@ -221,22 +221,39 @@ st.markdown("""
         padding: 12px; font-size: 16px; transition: all 0.3s ease; box-shadow: 0px 4px 15px rgba(0, 85, 255, 0.3);
     }
     .stButton>button:hover { background: linear-gradient(45deg, #00ffaa, #0033cc); transform: translateY(-3px); box-shadow: 0px 6px 20px rgba(0, 255, 204, 0.5); color: #ffffff !important; }
-    .box { padding: 30px; border-radius: 18px; margin-bottom: 25px; text-align: right; min-height: 240px; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); backdrop-filter: blur(4px); animation: fadeInUp 0.8s ease-in-out; transition: transform 0.3s; }
-    .box:hover { transform: scale(1.02); }
+    
+    .box { 
+        padding: 25px; 
+        border-radius: 16px; 
+        margin-bottom: 20px; 
+        text-align: right; 
+        min-height: 250px; 
+        height: auto; 
+        box-sizing: border-box;
+        box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); 
+        backdrop-filter: blur(4px); 
+        animation: fadeInUp 0.8s ease-in-out; 
+        transition: transform 0.3s; 
+    }
+    .box:hover { transform: scale(1.01); }
+    
     .inspire-box { background: linear-gradient(135deg, rgba(30,33,48,0.8), rgba(12,35,51,0.8)); border: 1px solid #00ffcc; }
     .warm-box { background: linear-gradient(135deg, rgba(43,27,23,0.8), rgba(26,15,13,0.8)); border: 1px solid #ff7b54; }
     .love-box { background: linear-gradient(135deg, rgba(45,20,44,0.8), rgba(28,9,27,0.8)); border: 1px solid #ff2e63; }
     .azkar-box { background: linear-gradient(135deg, rgba(16,44,41,0.8), rgba(10,26,24,0.8)); border: 1px solid #10b981; }
+    
     .stTabs [data-baseweb="tab-list"] { gap: 12px; justify-content: center; }
     .stTabs [data-baseweb="tab"] { height: 50px; background-color: #161a24; border-radius: 10px 10px 0px 0px; color: #888; font-weight: 700; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s; padding: 10px 20px; }
     .stTabs [aria-selected="true"] { background-color: #1e2330 !important; color: #00ffcc !important; border-bottom: 3px solid #00ffcc !important; }
-    .quran-text { font-size: 17px; color: #ffbb00; line-height: 1.8; font-weight: bold; }
-    .motivational-text { font-size: 18px; color: #00ffcc; line-height: 1.6; }
-    .warm-text { font-size: 19px; color: #ff9f80; line-height: 1.8; }
-    .love-text { font-size: 20px; color: #ff5e7e; line-height: 1.8; font-style: italic; }
-    .azkar-text { font-size: 18px; color: #34d399; line-height: 1.8; }
-    .dua-header { color: #00ffcc; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px dashed rgba(0, 255, 204, 0.4); padding-bottom: 10px; }
-    .code-badge { font-size: 14px; background-color: #00ffcc; color: #0e1117; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+    
+    .quran-text { font-size: 16px; color: #ffbb00; line-height: 1.8; font-weight: bold; }
+    .motivational-text { font-size: 17px; color: #00ffcc; line-height: 1.6; }
+    .warm-text { font-size: 18px; color: #ff9f80; line-height: 1.8; }
+    .love-text { font-size: 19px; color: #ff5e7e; line-height: 1.8; font-style: italic; }
+    .azkar-text { font-size: 17px; color: #34d399; line-height: 1.8; }
+    
+    .dua-header { color: #00ffcc; font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 12px; border-bottom: 1px dashed rgba(0, 255, 204, 0.4); padding-bottom: 8px; }
+    .code-badge { font-size: 13px; background-color: #00ffcc; color: #0e1117; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -253,8 +270,9 @@ with tabs[0]:
     with col1:
         st.markdown(f"<div class='box inspire-box'><h3 style='text-align: center; color:#00ffcc !important;'>💡 كلام من القلب لكِ <span class='code-badge'>247</span></h3><p class='motivational-text'>\"{st.session_state.daily_quote}\"</p></div>", unsafe_allow_html=True)
     with col2:
-        verses_html = "<br><br>".join([f"<b>{i+1}.</b> {v}" for i, v in enumerate(st.session_state.daily_verses)])
+        verses_html = "<br>".join([f"<b>{i+1}.</b> {v}" for i, v in enumerate(st.session_state.daily_verses)])
         st.markdown(f"<div class='box inspire-box'><div class='dua-header'>إني خرجت من حولي وقوتي ودخلت في حولك وقوتك يا الله</div><p class='quran-text'>{verses_html}</p></div>", unsafe_allow_html=True)
+    
     if st.button("🔄 تحديث العبارات والآيات الآن"):
         st.session_state.daily_quote = random.choice(quotes)
         st.session_state.daily_verses = verses[0] + random.sample(verses[1], 2)
@@ -280,4 +298,4 @@ with tabs[3]:
         st.rerun()
 
 st.markdown("<hr style='border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px;'>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #5c6878; font-size: 13px;'>تم التطوير بواسطة شيماء علي عبد الحسين | v1.8 | 247</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #5c6878; font-size: 13px;'>تم التطوير بواسطة شيماء علي عبد الحسين | v1.9 | 247</p>", unsafe_allow_html=True)
