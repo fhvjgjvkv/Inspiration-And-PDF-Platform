@@ -5,62 +5,187 @@ import os
 import urllib.request
 from PIL import Image
 
-# ==== إعدادات الصفحة والهوية البصرية ====
-st.set_page_config(page_title="منصة الإلهام وتحويل الملفات | 247", layout="wide", page_icon="✨")
-
-st.markdown("""
-<style>
-.main-title { font-size: 32px; font-weight: bold; text-align: center; color: #4A154B; margin-bottom: 20px; }
-.card { background-color: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 5px solid #4A154B; margin-bottom: 15px; }
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("<p class='main-title'>✨ منصة الإلهام وتحويل الملفات 247</p>", unsafe_allow_html=True)
-
-# ==== خطوط ReportLab ====
+# ---- تسجيل الخط العربي بأمان ----
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-FONT_NAME = "DejaVuSans"
-FONT_FILE = "DejaVuSans.ttf"
+# توحيد اسم الخط بحالة أحرف ثابتة ومطابقة تماماً
+FONT_NAME = 'DejaVuSans'
+FONT_FILE = 'DejaVuSans.ttf'
 
+# دالة لتحميل الخط من الإنترنت إذا لم يكن موجوداً في السيرفر
 def download_font():
     if not os.path.exists(FONT_FILE):
+        # رابط مباشر وموثوق لتحميل خط DejaVuSans
         url = "https://github.com/googlefonts/dejavu-fonts/raw/master/resources/fonts/ttf/DejaVuSans.ttf"
         try:
             urllib.request.urlretrieve(url, FONT_FILE)
         except:
-            fallback = "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/DejaVuSans.ttf"
-            urllib.request.urlretrieve(fallback, FONT_FILE)
+            # رابط احتياطي في حال فشل الأول
+            fallback_url = "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/DejaVuSans.ttf"
+            try:
+                urllib.request.urlretrieve(fallback_url, FONT_FILE)
+            except:
+                pass
 
+# تشغيل دالة التحميل قبل كل شيء
 download_font()
 
+# تسجيل الخط في ReportLab باسم موحد
+font_loaded = False
 if os.path.exists(FONT_FILE):
     try:
         pdfmetrics.registerFont(TTFont(FONT_NAME, FONT_FILE))
-        pdfmetrics.registerFontFamily(
-            FONT_NAME,
-            normal=FONT_NAME,
-            bold=FONT_NAME,
-            italic=FONT_NAME,
-            boldItalic=FONT_NAME
-        )
+        font_loaded = True
     except:
         pass
 
-# ==== دعم اللغة العربية ====
-import arabic_reshaper
-from bidi.algorithm import get_display
-from xml.sax.saxutils import escape
+# إذا فشلت جميع الحلول، نستخدم الخط الافتراضي كحل أخير لتجنب الانهيار
+if not font_loaded:
+    try:
+        pdfmetrics.registerFont(TTFont(FONT_NAME, 'Helvetica'))
+    except:
+        pass
+
+# ---- دالة تشكيل النص العربي ----
+ARABIC_RESHAPER_MAP = {
+    '\u0627': ('\uFE8D', '\uFE8E', '\uFE8D', '\uFE8E'),
+    '\u0628': ('\uFE8F', '\uFE90', '\uFE91', '\uFE92'),
+    '\u062A': ('\uFE95', '\uFE96', '\uFE97', '\uFE98'),
+    '\u062B': ('\uFE99', '\uFE9A', '\uFE9B', '\uFE9C'),
+    '\u062C': ('\uFE9D', '\uFE9E', '\uFE9F', '\uFEA0'),
+    '\u062D': ('\uFEA1', '\uFEA2', '\uFEA3', '\uFEA4'),
+    '\u062E': ('\uFEA5', '\uFEA6', '\uFEA7', '\uFEA8'),
+    '\u062F': ('\uFEA9', '\uFEAA', '\uFEA9', '\uFEAA'),
+    '\u0630': ('\uFEAB', '\uFEAC', '\uFEAB', '\uFEAC'),
+    '\u0631': ('\uFEAD', '\uFEAE', '\uFEAD', '\uFEAE'),
+    '\u0632': ('\uFEAF', '\uFEB0', '\uFEAF', '\uFEB0'),
+    '\u0633': ('\uFEB1', '\uFEB2', '\uFEB3', '\uFEB4'),
+    '\u0634': ('\uFEB5', '\uFEB6', '\uFEB7', '\uFEB8'),
+    '\u0635': ('\uFEB9', '\uFEBA', '\uFEBB', '\uFEBC'),
+    '\u0636': ('\uFEBD', '\uFEBE', '\uFEBF', '\uFEC0'),
+    '\u0637': ('\uFEC1', '\uFEC2', '\uFEC3', '\uFEC4'),
+    '\u0638': ('\uFEC5', '\uFEC6', '\uFEC7', '\uFEC8'),
+    '\u0639': ('\uFEC9', '\uFECA', '\uFECB', '\uFECC'),
+    '\u063A': ('\uFECD', '\uFECE', '\uFECF', '\uFED0'),
+    '\u0641': ('\uFED1', '\uFED2', '\uFED3', '\uFED4'),
+    '\u0642': ('\uFED5', '\uFED6', '\uFED7', '\uFED8'),
+    '\u0643': ('\uFED9', '\uFEDA', '\uFEDB', '\uFEDC'),
+    '\u0644': ('\uFEDD', '\uFEDE', '\uFEDF', '\uFEE0'),
+    '\u0645': ('\uFEE1', '\uFEE2', '\uFEE3', '\uFEE4'),
+    '\u0646': ('\uFEE5', '\uFEE6', '\uFEE7', '\uFEE8'),
+    '\u0647': ('\uFEE9', '\uFEEA', '\uFEEB', '\uFEEC'),
+    '\u0648': ('\uFEED', '\uFEEE', '\uFEED', '\uFEEE'),
+    '\u064A': ('\uFEF1', '\uFEF2', '\uFEF3', '\uFEF4'),
+    '\u0629': ('\uFE93', '\uFE94', '\uFE93', '\uFE94'),
+    '\u0649': ('\uFEEF', '\uFEF0', '\uFEEF', '\uFEF0'),
+    '\u0622': ('\uFE81', '\uFE82', '\uFE81', '\uFE82'),
+    '\u0623': ('\uFE83', '\uFE84', '\uFE83', '\uFE84'),
+    '\u0625': ('\uFE87', '\uFE88', '\uFE87', '\uFE88'),
+    '\u0626': ('\uFE89', '\uFE8A', '\uFE8B', '\uFE8C'),
+    '\u0621': ('\uFE80', '\uFE80', '\uFE80', '\uFE80'),
+    '\u0624': ('\uFE85', '\uFE86', '\uFE85', '\uFE86'),
+}
+NON_JOINING_NEXT = {
+    '\u0627', '\u062F', '\u0630', '\u0631', '\u0632', '\u0648',
+    '\u0622', '\u0623', '\u0625', '\u0624', '\u0629', '\u0649'
+}
+
+def _reshape_word(word):
+    chars = list(word)
+    n = len(chars)
+    result = []
+    for i, char in enumerate(chars):
+        if char not in ARABIC_RESHAPER_MAP:
+            result.append(char)
+            continue
+        prev_joins = (i > 0 and chars[i-1] in ARABIC_RESHAPER_MAP and chars[i-1] not in NON_JOINING_NEXT)
+        next_joins = (i < n-1 and chars[i+1] in ARABIC_RESHAPER_MAP and char not in NON_JOINING_NEXT)
+        forms = ARABIC_RESHAPER_MAP[char]
+        if prev_joins and next_joins:
+            result.append(forms[3])
+        elif prev_joins:
+            result.append(forms[1])
+        elif next_joins:
+            result.append(forms[2])
+        else:
+            result.append(forms[0])
+    return ''.join(reversed(result))
 
 def prepare_arabic(text):
-    if not text.strip():
-        return ""
-    reshaped = arabic_reshaper.reshape(text)
-    bidi_text = get_display(reshaped)
-    return escape(bidi_text)
+    lines = text.split('\n')
+    result_lines = []
+    for line in lines:
+        words = line.split(' ')
+        processed = []
+        for w in words:
+            if any('\u0600' <= c <= '\u06FF' for c in w):
+                processed.append(_reshape_word(w))
+            else:
+                processed.append(w)
+        result_lines.append(' '.join(reversed(processed)))
+    return '\n'.join(result_lines)
 
-# ================= بنك البيانات الكامل (100% بدون أي نقص) =================
+
+# ====== إعدادات الصفحة والهوية البصرية ======
+
+st.set_page_config(page_title="منصة الإلهام وتحويل الملفات | 247", layout="wide", page_icon="✨")
+
+st.markdown("""
+<style>
+    .main { background-color: #0e1117; }
+    h1, h2, h3 { color: #00ffcc !important; text-align: center; }
+    .stButton>button { 
+        background: linear-gradient(45deg, #00ffcc, #0055ff); 
+        color: white; border-radius: 10px; border: none; font-weight: bold; width: 100%;
+        padding: 10px; font-size: 16px;
+    }
+    .custom-box {
+        background: linear-gradient(135deg, #1e2130 0%, #0c2333 100%);
+        padding: 20px; border-radius: 12px; border: 1px solid #00ffcc; text-align: center;
+        margin-bottom: 20px; color: white; min-height: 220px;
+    }
+    .warm-box {
+        background: linear-gradient(135deg, #2b1b17 0%, #1a0f0d 100%);
+        padding: 25px; border-radius: 15px; border: 1px solid #ff7b54; text-align: right;
+        margin-bottom: 20px; color: #ffe5dd; direction: rtl; line-height: 1.8;
+    }
+    .love-box {
+        background: linear-gradient(135deg, #2d142c 0%, #1c091b 100%);
+        padding: 25px; border-radius: 15px; border: 1px solid #ff2e63; text-align: right;
+        margin-bottom: 20px; color: #ffe3ed; direction: rtl; line-height: 1.8;
+    }
+    .quran-text {
+        font-size: 16px; color: #ffaa00; line-height: 1.8; font-weight: bold; text-align: right; direction: rtl;
+    }
+    .motivational-text {
+        font-size: 17px; color: #00ffcc; line-height: 1.6; font-style: normal; text-align: right; direction: rtl;
+    }
+    .warm-advice-text {
+        font-size: 18px; color: #ff9f80; font-weight: normal; text-align: right; direction: rtl; line-height: 1.8;
+    }
+    .love-letter-text {
+        font-size: 19px; color: #ff5e7e; font-weight: normal; text-align: right; direction: rtl; line-height: 1.8; font-style: italic;
+    }
+    .dua-header {
+        color: #00ffcc; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #00ffcc; padding-bottom: 8px;
+    }
+    .code-badge {
+        font-size: 14px; background-color: #00ffcc; color: #0e1117; padding: 3px 8px; border-radius: 5px; font-weight: bold;
+    }
+    .warm-badge {
+        font-size: 14px; background-color: #ff7b54; color: white; padding: 3px 8px; border-radius: 5px; font-weight: bold;
+    }
+    .love-badge {
+        font-size: 14px; background-color: #ff2e63; color: white; padding: 3px 8px; border-radius: 5px; font-weight: bold;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("<h1>✨ منصة الإلهام وتحويل الملفات <span class='code-badge'>247</span></h1>", unsafe_allow_html=True)
+
+# ================= بنك البيانات الكامل =================
+
 motivational_quotes = [
     "حبيبتي، تذكري دايمًا إن هذي التعب والمواقف الصعبة هي اللي راح تصنع منكِ إنسانة قوية وبكرة تفتخرين بنفسكِ وبكل خطوة مشيتيها.",
     "الدراسة هي سلاحكِ وسندكِ بهالدنيا، وكل ساعة تعب وسهر تقضينها اليوم هي اللي بتخليكِ مستقلة ومرتاحة بالمستقبل.",
@@ -88,7 +213,7 @@ motivational_quotes = [
     "أنتِ مو وحدج، كل دعواتي وياج وكل خطوة تخطيها أنا فخور ومؤمن بيج لأبعد حد.",
     "القمة تنتظرج، والطريق إلها يحتاج صبر وقوة، وأنتِ تمتلكين الاثنين وأكثر.",
     "تذكري إن النجاح هو أفضل انتقام من كل الظروف الصعبة اللي واجهتج.",
-    "لا تستسلمين هسة، إنتِ قطعتي شوط كبير وما بقى إلا القليل، شدي حيلج أكثر.",
+    "لا تستسلمين هسة، إنتِ قطعتي شوط كبير وما بقى إلا القليل, شدي حيلج أكثر.",
     "الأحلام ما تتحقق بالأماني، تتحقق بالتعب والسهر والدراسة، وأنتِ دا تبذلين كل جهدج.",
     "أنتِ ذكية ومميزة، ولا تخلين درجات أو امتحانات تقلل من قيمتكِ الحقيقية وقدراتج.",
     "كلما حسيتي بتعب، تذكري اللحظة اللي تجيج بيها النتيجة وتشوفين كلمة 'ناجحة'.",
@@ -159,7 +284,7 @@ motivational_quotes = [
     "خلي هدفج واضح كدام عيونج، ولا تخلين أي شي يشتت انتباهج عنه.",
     "أنتِ تستحقين تفرحين وتفتخرين بروحج، فابذلي كل اللي تكدرين عليه هسة.",
     "الدراسة هي سلاحج اللي يخليج قوية بكل مكان تروحين بيه، فتمسكي بيه.",
-    "كلما زاد التحدي، زادت متعة الوصول والنجاح, فاستمتعي برحلتج للقمة.",
+    "كلما زاد التحدي، زادت متعة الوصول والنجاح، فاستمتعي برحلتج للقمة.",
     "أنتِ أملي وفخري، وأدري إنج راح ترفعين راسي وراس أهلج بنجاحج الكبير.",
     "تذكري دايمًا: 'ما ضاقت إلا لتفرج'، وكل هالتعب راح يتحول لراحة وفرحة جبيرة."
 ]
@@ -187,9 +312,9 @@ warm_advices = [
     "حافظي على هدوئكِ، التوتر ما يحل المشاكل بس يتعبكِ.. فكري برواق وكل شي ينحل.",
     "خليكِ دايمًا متفائلة، الأيام الجاية شايلة لج فرحة تنسيكِ كل تعب السنين اللي فاتت.",
     "صحتكِ النفسية هي الأهم، لا تضغطين على روحكِ فوق طاقتها.. ارتاحي وعاودي من جديد.",
-    "كلما حسيتي بضعف, تذكري اللحظات اللي جنتِ بيها قوية وتغلبتي على ظروف أصعب.",
+    "كلما حسيتي بضعف، تذكري اللحظات اللي جنتِ بيها قوية وتغلبتي على ظروف أصعب.",
     "أنتِ مميزة بكل تفاصيلكِ، ولا تخلين أي كلام سلبي من أي شخص يأثر على ثقتكِ بنفسكِ.",
-    "استمعي برحلتكِ وصعودكِ، كل خطوة تخطيها هي جزء من شخصيتكِ القوية والناضجة.",
+    "استمتعي برحلتكِ وصعودكِ، كل خطوة تخطيها هي جزء من شخصيتكِ القوية والناضجة.",
     "لا تترددين تطلبين المساعدة أو الراحة لما تحتاجينها، هاد مو ضعف بل وعي وقوة.",
     "أحبكِ بكل حالاتكِ، بتعبكِ وبفرحكِ وبضعفكِ وقوتكِ.. أنتِ دايمًا غالية على قلبي.",
     "فكري بالأشياء الحلوة اللي تنتظركِ بعد ما تخلصين هالمرحلة.. الحلم يستاهل كل تعبكِ.",
@@ -198,7 +323,7 @@ warm_advices = [
     "كل عسير بيمر، وكل ضيق بيتحول لفرج وفرحة جبيرة.. بس اصبري وشدي حيلكِ.",
     "ديري بالكِ على عيونكِ وصحتكِ، أنتِ أغلى ما أملك وبهالدنيا ما يهمني غير راحتكِ.",
     "خليكِ دايمًا قريبة من ربكِ، الصلاة والدعاء هم الراحة الحقيقية من كل ضغوطات الحياة.",
-    "لا تستعجلين النتايج، كل شي يجي بوقته المناسب والمكتوب لج, فاصبري واطمئني.",
+    "لا تستعجلين النتايج، كل شي يجي بوقته المناسب والمكتوب لج، فاصبري واطمئني.",
     "أنتِ كفو وقدها، وبكرة بترفعين راسكِ وتكولين 'الحمد لله اللي ما ضيع لي تعب'.",
     "عادي لو غلطتي أو تعثرتي، المهم إنكِ ترجعين توقفين وتكملين طريقكِ بكل إصرار.",
     "خلي كلام الناس ورا ظهركِ، ركزي بس بنفسكِ وبمستقبلكِ وبحلمكِ الكبير.",
@@ -254,7 +379,7 @@ variable_verses = [
     "﴿وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ ۚ عَلَيْهِ تَوَكَّلْتُ﴾",
     "﴿وَاصْبِرْ لِحُكْمِ رَبِّكَ فَإِنَّكَ بِأَعْيُنِنَا﴾",
     "﴿سَيَجْعَلُ اللَّهُ بَعْدَ عُسْرٍ يُسْرًا﴾",
-    "﴿إِنَّ اللَّهَ لَا يُضِيعُ أَجْرَ الْمُحْسينِينَ﴾",
+    "﴿إِنَّ اللَّهَ لَا يُضِيعُ أَجْرَ الْمُحْسِنِينَ﴾",
     "﴿وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ﴾",
     "﴿وَتَوَكَّلْ عَلَى الْحَيِّ الَّذِي لَا يَمُوتُ﴾",
     "﴿إِنَّ رَبِّي قَرِيبٌ مُجِيبٌ﴾",
@@ -272,7 +397,7 @@ variable_verses = [
     "﴿لَا تَدْرِي لَعَلَّ اللَّهَ يُحْدِثُ بَعْدَ ذَٰلِكَ أَمْرًا﴾",
     "﴿قُلِ اللَّهُ يُنَجِّيكُمْ مِنْهَا وَمِنْ كُلِّ كَرْبٍ﴾",
     "﴿رَبِّ اشْرَحْ لِي صَدْرِي * وَيَسِّرْ لِي أَمْرِي﴾",
-    "﴿فَاللَّهُ خَيْرٌ حَافِظًا ۖ وَهُوَ أَرْحَمُ الرَّاحِمِينَ﴾",
+    "﴿فَاللَّهُ خَيْرٌ حَافِظًا ۖ وَهُوَ أرحم الرَّاحِمِينَ﴾",
     "﴿إِنَّ رَحْمَتَ اللَّهِ قَرِيبٌ مِنَ الْمُحْسِنِينَ﴾",
     "﴿وَكَانَ حَقًّا عَلَيْنَا نَصْرُ الْمُؤْمِنِينَ﴾",
     "﴿إِنَّ مَعِيَ رَبِّي سَيَهْدِينِ﴾",
@@ -294,41 +419,35 @@ variable_verses = [
     "﴿وَقُلِ الْحَمْدُ لِلَّهِ﴾"
 ]
 
-# إدارة الحالة لتخزين البيانات المختارة لليوم
 if "daily_quote" not in st.session_state:
     st.session_state.daily_quote = random.choice(motivational_quotes)
     st.session_state.daily_advice = random.choice(warm_advices)
     st.session_state.love_letter = random.choice(love_letters)
     st.session_state.daily_verses = fixed_verses + random.sample(variable_verses, 2)
 
+
 # ================= واجهة التبويبات =================
-tabs = st.tabs([
-    "💡 قسم الإلهام والتذكير", 
-    "💖 قسم النصائح الدافئة 247", 
-    "💌 رسائل حب واطمئنان", 
-    "📄 قسم تحويل النصوص والصور إلى PDF"
-])
+
+tabs = st.tabs(["💡 قسم الإلهام والتذكير", "💖 قسم النصائح الدافئة 247", "💌 رسائل حب واطمئنان", "📄 قسم تحويل النصوص والصور إلى PDF"])
 
 with tabs[0]:
     st.markdown("### 🕊️ قسم التحفيز والذكر")
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"""
-        <div class='card'>
-            <h4>💡 كلام من القلب لكِ 247</h4>
-            <p>"{st.session_state.daily_quote}"</p>
+        <div class='custom-box' style='text-align: right;'>
+            <h3 style='text-align: center;'>💡 كلام من القلب لكِ <span class='code-badge'>247</span></h3>
+            <p class='motivational-text'>"{st.session_state.daily_quote}"</p>
         </div>
         """, unsafe_allow_html=True)
     with col2:
-        verses_html = "".join([f"<li>{v}</li>" for v in st.session_state.daily_verses])
+        verses_html = "<br><br>".join([f"<b>{i+1}.</b> {v}" for i, v in enumerate(st.session_state.daily_verses)])
         st.markdown(f"""
-        <div class='card'>
-            <h4>📖 الآيات اليومية والذكر</h4>
-            <p>إني خرجت من حولي وقوتي ودخلت في حولك وقوتك يا الله</p>
-            <ul>{verses_html}</ul>
+        <div class='custom-box' style='text-align: right;'>
+            <div class='dua-header'>إني خرجت من حولي وقوتي ودخلت في حولك وقوتك يا الله</div>
+            <p class='quran-text'>{verses_html}</p>
         </div>
         """, unsafe_allow_html=True)
-    
     if st.button("🔄 تحديث العبارات والآيات الآن"):
         st.session_state.daily_quote = random.choice(motivational_quotes)
         st.session_state.daily_advice = random.choice(warm_advices)
@@ -337,11 +456,11 @@ with tabs[0]:
         st.rerun()
 
 with tabs[1]:
-    st.markdown("### 🌸 نصائح دافئة")
+    st.markdown("### 🌸 نصائح دافئة من شخص يحبكِ")
     st.markdown(f"""
-    <div class='card'>
-        <h4>💌 رسالة خاصة لعيونكِ 247</h4>
-        <p>"{st.session_state.daily_advice}"</p>
+    <div class='warm-box'>
+        <h3 style='text-align: center; color: #ff7b54 !important;'>💌 رسالة خاصة لعيونكِ <span class='warm-badge'>247</span></h3>
+        <p class='warm-advice-text'>"{st.session_state.daily_advice}"</p>
     </div>
     """, unsafe_allow_html=True)
     if st.button("💝 استلام نصيحة دافئة جديدة"):
@@ -351,30 +470,31 @@ with tabs[1]:
 with tabs[2]:
     st.markdown("### 🌹 إلى من أحب وأعشق")
     st.markdown(f"""
-    <div class='card'>
-        <h4>💝 رسالة حب واطمئنان 247</h4>
-        <p>"{st.session_state.love_letter}"</p>
+    <div class='love-box'>
+        <h3 style='text-align: center; color: #ff2e63 !important;'>💝 رسالة حب واطمئنان <span class='love-badge'>247</span></h3>
+        <p class='love-letter-text'>"{st.session_state.love_letter}"</p>
     </div>
     """, unsafe_allow_html=True)
     if st.button("💘 قراءة رسالة حب جديدة"):
         st.session_state.love_letter = random.choice(love_letters)
         st.rerun()
 
+
 with tabs[3]:
     st.markdown("### 📂 تحويل النصوص والصور إلى ملف PDF")
-    st.info("✅ يدعم النص العربي والاتجاه الصحيح RTL مع الصور المرفوعة")
-    
+    st.info("✅ يدعم الآن النص العربي بشكل صحيح (الحروف متصلة واتجاه RTL)")
+
     text_input = st.text_area(
-        "أدخل النص الذي تريد إضافته إلى ملف PDF:", 
-        height=150, 
+        "أدخل النص الذي تريد إضافته إلى ملف PDF:",
+        height=150,
         placeholder="اكتب النص هنا..."
     )
     uploaded_images = st.file_uploader(
-        "قم برفع الصور لدمجها في الـ PDF:", 
-        type=["jpg", "jpeg", "png", "webp"], 
+        "قم برفع الصور (JPG, PNG) لدمجها في الـ PDF:",
+        type=["jpg", "jpeg", "png", "webp"],
         accept_multiple_files=True
     )
-    
+
     if st.button("توليد ملف الـ PDF"):
         if not text_input and not uploaded_images:
             st.error("الرجاء إدخال نص أو رفع صورة واحدة على الأقل!")
@@ -383,54 +503,53 @@ with tabs[3]:
                 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage
                 from reportlab.lib.styles import ParagraphStyle
                 from reportlab.lib.pagesizes import A4
-                
+
                 pdf_buffer = io.BytesIO()
                 doc = SimpleDocTemplate(
-                    pdf_buffer, 
-                    pagesize=A4, 
-                    rightMargin=40, 
-                    leftMargin=40, 
-                    topMargin=40, 
-                    bottomMargin=40
+                    pdf_buffer, pagesize=A4,
+                    rightMargin=40, leftMargin=40,
+                    topMargin=40, bottomMargin=40
                 )
-                
-                # إعدادات نمط النص العربي في ReportLab
+
+                # استخدام FONT_NAME المطابق لاسم الخط المسجل في الأعلى
                 arabic_style = ParagraphStyle(
                     name='ArabicStyle',
                     fontName=FONT_NAME,
                     fontSize=13,
                     leading=22,
-                    alignment=2  # محاذاة لليمين
+                    alignment=2,  # محاذاة لليمين
+                    rightIndent=5,
                 )
-                
+
                 story = []
-                
-                # إضافة النصوص ومعالجتها
+
                 if text_input:
                     for line in text_input.split('\n'):
                         if line.strip():
                             processed_line = prepare_arabic(line.strip())
                             story.append(Paragraph(processed_line, arabic_style))
-                            story.append(Spacer(1, 10))
-                
-                # إضافة الصور ومعالجتها
+                            story.append(Spacer(1, 6))
+                    story.append(Spacer(1, 15))
+
                 if uploaded_images:
                     for uploaded_img in uploaded_images:
                         img = Image.open(uploaded_img)
                         img_width, img_height = img.size
                         aspect = img_height / float(img_width)
-                        
-                        display_width = 450
-                        display_height = 450 * aspect
-                        
-                        uploaded_img.seek(0)
-                        
-                        story.append(RLImage(uploaded_img, width=display_width, height=display_height))
+                        display_width = 480
+                        display_height = 480 * aspect
+
+                        img_buf = io.BytesIO()
+                        img.save(img_buf, format="PNG")
+                        img_buf.seek(0)
+
+                        rl_img = RLImage(img_buf, width=display_width, height=display_height)
+                        story.append(rl_img)
                         story.append(Spacer(1, 15))
-                
+
                 doc.build(story)
                 pdf_data = pdf_buffer.getvalue()
-                
+
                 st.success("✅ تم إنشاء ملف الـ PDF بنجاح!")
                 st.download_button(
                     label="⬇️ اضغط هنا لتنزيل ملف الـ PDF",
@@ -441,9 +560,6 @@ with tabs[3]:
             except Exception as e:
                 st.error(f"حدث خطأ أثناء إنشاء الملف: {e}")
 
-st.markdown("""
-<hr>
-<p style='text-align: center; color: gray; font-size: 12px;'>
-تم التطوير بواسطة شيماء علي عبد الحسين | v1.3 | 247
-</p>
-""", unsafe_allow_html=True)
+st.markdown("<hr>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888888;'>تم التطوير بواسطة شيماء علي عبد الحسين | v1.3 | 247</p>", unsafe_allow_html=True)
+
