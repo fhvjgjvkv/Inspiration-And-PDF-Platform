@@ -138,7 +138,7 @@ def load_data():
         "ثقي بحدسكِ ومشاعركِ، فأنتِ تعرفين ما هو الأفضل لروحكِ.",
         "اجعلي لنفسكِ وقتاً خاصاً تمارسين فيه هواية تحبينها وتسعدكِ.",
         "الحياة قصيرة، فلا تضيعيها في القلق والتوتر المستمر.",
-        "أنتِ رائعة كما أنتِ، فلا تحاولي إرضاء الجميع على حساب راحتكِ.",
+        "أنتِ رائعة كما أنتِ، فلا تحاولي أن تكوني نسخة من أحد.",
         "تذكري أن الأوقات الصعبة تمضي وتترك خلفها دروساً قيمة وقوة.",
         "نامي جيداً واهتمي بتغذيتكِ، فالعقل السليم في الجسم السليم.",
         "أنتِ زهرة جميلة تحتاج للعناية والاهتمام لتستمر في العطاء والازدهار.",
@@ -205,7 +205,7 @@ def load_data():
     
     azkar = [
         "أَصْبَحْنَا وَأَصْبَحَ المُلْكُ لِلَّهِ وَالحَمْدُ لِلَّهِ، لا إلَهَ إلَّا اللَّهُ وَحْدَهُ لا شَرِيكَ له.",
-        "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي شَأْنِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ.",
+        "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَةِيثُ أَصْلِحْ لِي شَأْنِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ.",
         "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ.",
         "حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ ۖ وَهو رَبُّ الْعَرْشِ الْعَظِيمِ (٧ مرات)."
     ]
@@ -213,9 +213,8 @@ def load_data():
 
 quotes, advices, letters, fixed_verses, random_pool, azkar = load_data()
 
-# ====== دالة التوليد لضمان إخراج 4 آيات (2 ثابتة + 2 يتم تحديثها إجبارياً) ======
+# ====== دالة التوليد لضمان إخراج 4 آيات (2 ثابتة + 2 تتحدث إجبارياً) ======
 def generate_new_verses():
-    # سحب آيتين عشوائيتين جديدتين بالكامل في كل مرة يتم استدعاء الدالة
     dynamic_verses = random.sample(random_pool, 2)
     return fixed_verses + dynamic_verses
 
@@ -233,18 +232,15 @@ st.markdown("""
     html, body, [class*="css"] { font-family: 'Cairo', sans-serif; background-color: #0b0f19; box-sizing: border-box; }
     @keyframes fadeInUp { from { opacity: 0; transform: translate3d(0, 20px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
     
-    /* تنسيق الهيدر والبادج */
     h1 { color: #00ffcc !important; text-align: center; font-weight: 700; text-shadow: 0px 0px 15px rgba(0, 255, 204, 0.4); }
     .code-badge { font-size: 13px; background-color: #00ffcc; color: #0b0f19; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
 
-    /* أزرار التحديث الموحدة */
     .stButton>button { 
         background: linear-gradient(45deg, #00ffcc, #0088ff); color: #ffffff !important; border-radius: 12px; border: none; font-weight: bold; width: 100%;
         padding: 12px; font-size: 16px; transition: all 0.3s ease; box-shadow: 0px 4px 15px rgba(0, 136, 255, 0.25);
     }
     .stButton>button:hover { background: linear-gradient(45deg, #00ffaa, #0055cc); transform: translateY(-3px); box-shadow: 0px 6px 20px rgba(0, 255, 204, 0.4); color: #ffffff !important; }
     
-    /* نظام الصناديق المتناسق بالألوان */
     .box { 
         padding: 28px; 
         border-radius: 18px; 
@@ -260,19 +256,16 @@ st.markdown("""
     }
     .box:hover { transform: translateY(-4px); }
     
-    /* تدرجات ألوان الصناديق لتكون جذابة ومنظمة */
     .inspire-box { background: linear-gradient(135deg, #131c31, #0d1322); border: 1px solid rgba(0, 255, 204, 0.3); box-shadow: 0 4px 20px rgba(0, 255, 204, 0.1); }
     .warm-box { background: linear-gradient(135deg, #24191c, #160f11); border: 1px solid rgba(255, 123, 84, 0.3); box-shadow: 0 4px 20px rgba(255, 123, 84, 0.1); }
     .love-box { background: linear-gradient(135deg, #281425, #170b16); border: 1px solid rgba(255, 46, 99, 0.3); box-shadow: 0 4px 20px rgba(255, 46, 99, 0.1); }
     .azkar-box { background: linear-gradient(135deg, #0f2522, #081513); border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1); }
     .complaint-box { background: linear-gradient(135deg, #161e2e, #0e131d); border: 1px solid rgba(0, 136, 204, 0.3); box-shadow: 0 4px 20px rgba(0, 136, 204, 0.1); }
     
-    /* التبويبات المتطورة */
     .stTabs [data-baseweb="tab-list"] { gap: 14px; justify-content: center; }
     .stTabs [data-baseweb="tab"] { height: 52px; background-color: #121824; border-radius: 12px 12px 0px 0px; color: #7b8a9c; font-weight: 700; border: 1px solid rgba(255,255,255,0.03); transition: all 0.3s ease; padding: 10px 24px; }
     .stTabs [aria-selected="true"] { background-color: #1a2333 !important; color: #00ffcc !important; border-bottom: 3px solid #00ffcc !important; }
     
-    /* نصوص الأقسام وتلوينها الدقيق */
     .motivational-text { font-size: 18px; color: #e2f1ff; line-height: 1.7; font-weight: 400; }
     .quran-text { font-size: 17px; color: #ffd166; line-height: 1.9; font-weight: 700; text-align: center; }
     .warm-text { font-size: 18px; color: #ffb499; line-height: 1.8; }
@@ -281,7 +274,6 @@ st.markdown("""
     
     .dua-header { color: #00ffcc; font-size: 15px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px dashed rgba(0, 255, 204, 0.25); padding-bottom: 10px; }
     
-    /* زر الإرسال المباشر */
     .support-link {
         display: block; width: 100%; text-align: center; background: linear-gradient(45deg, #0088cc, #00aaff); color: #ffffff !important; 
         padding: 14px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 16px; 
@@ -304,11 +296,9 @@ with tabs[0]:
     with col1:
         st.markdown(f"<div class='box inspire-box'><h3 style='text-align: center; color:#00ffcc !important;'>💡 كلام من القلب لكِ</h3><p class='motivational-text'>\"{st.session_state.daily_quote}\"</p></div>", unsafe_allow_html=True)
     with col2:
-        # عرض الأربع آيات (آيتين ثابتتين + آيتين عشوائيتين تتحدث إجبارياً)
         verses_html = "<br><br>".join([f"<b>{i+1}.</b> {v}" for i, v in enumerate(st.session_state.daily_verses)])
         st.markdown(f"<div class='box inspire-box'><div class='dua-header'>إني خرجت من حولي وقوتي ودخلت في حولك وقوتك يا الله</div><p class='quran-text'>{verses_html}</p></div>", unsafe_allow_html=True)
     
-    # عند الضغط هنا، تتحدث آيتين بشكل إجباري
     if st.button("🔄 تحديث العبارات والآيات الآن"):
         st.session_state.daily_quote = random.choice(quotes)
         st.session_state.daily_verses = generate_new_verses()
@@ -333,7 +323,7 @@ with tabs[3]:
         st.session_state.love_letter = random.choice(letters)
         st.rerun()
 
-# ====== قسم الشكاوى (الرقم مخفي بالكامل في الواجهة) ======
+# ====== قسم الشكاوى (عبر البريد الإلكتروني htnanfnc@gmail.com) ======
 with tabs[4]:
     st.markdown("<h4 style='color:#00ffcc; text-align:center; margin-bottom:15px;'>🛠️ إدارة الشكاوى والملاحظات</h4>", unsafe_allow_html=True)
     st.markdown("""
@@ -352,15 +342,20 @@ with tabs[4]:
         
         if submit_form:
             if u_message.strip():
-                # تجهيز النص وتشفيره للرابط
-                full_text = f"شكوى جديدة من منصة 247:\nالاسم: {u_name if u_name else 'غير معروف'}\nالرسالة:\n{u_message}"
-                encoded_msg = urllib.parse.quote(full_text)
+                # إعداد نصوص الإيميل وتشفيرها
+                email_to = "htnanfnc@gmail.com"
+                subject = "شكوى جديدة من منصة 247"
+                body_text = f"الاسم: {u_name if u_name else 'غير معروف'}\n\nالرسالة:\n{u_message}"
                 
-                # استخدام رابط التليجرام الآمن برقمك دون عرضه
-                telegram_url = f"https://t.me/+9647822169684?text={encoded_msg}"
+                # ترميز النصوص لتكون صالحة للاستخدام في الرابط
+                encoded_subject = urllib.parse.quote(subject)
+                encoded_body = urllib.parse.quote(body_text)
                 
-                st.markdown(f'<a href="{telegram_url}" target="_blank" class="support-link">📲 قدّم الشكوى</a>', unsafe_allow_html=True)
-                st.success("تم تجهيز الرسالة بنجاح! اضغطي على زر 'قدّم الشكوى' بالأعلى للتوجيه المباشر.")
+                # توليد رابط mailto المباشر
+                mailto_url = f"mailto:{email_to}?subject={encoded_subject}&body={encoded_body}"
+                
+                st.markdown(f'<a href="{mailto_url}" class="support-link">📧 قدّم الشكوى عبر البريد</a>', unsafe_allow_html=True)
+                st.success("تم تجهيز الشكوى بنجاح! اضغطي على الزر بالأعلى للإرسال المباشر.")
             else:
                 st.warning("يرجى كتابة تفاصيل الشكوى أولاً.")
 
