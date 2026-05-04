@@ -7,7 +7,6 @@ st.set_page_config(page_title="منصة الإلهام والتذكير | 247", 
 # ====== بنك البيانات والعبارات ======
 @st.cache_data
 def load_data():
-    # 1. قسم الإلهام والتذكير (100 عبارة)
     quotes = [
         "تذكري دايمًا إن هذي التعب والمواقف الصعبة هي اللي راح تصنع منكِ إنسانة قوية.",
         "الدراسة هي سلاحكِ وسندكِ بهالدنيا، وكل ساعة تعب وسهر بتخليكِ مستقلة.",
@@ -111,7 +110,6 @@ def load_data():
         "اجعلي من نجاحكِ اليوم بداية لنجاحات أكبر في المستقبل."
     ]
 
-    # 2. قسم النصائح من القلب (40 نصيحة)
     advices = [
         "حبيبتي، لا تقسين على نفسكِ، تعبتي هواية وتستاهلين شوية حنان من ذاتكِ.",
         "لما تحسين الدنيا قفلت بوجهكِ، تعالي ارتاحي واشربي شي دافي.",
@@ -155,7 +153,6 @@ def load_data():
         "دمتِ قوية ومشرقة، ونحن جميعاً فخورون بما تقدمينه وتحققينه."
     ]
 
-    # 3. قسم رسائل الحب والاطمئنان (30 رسالة)
     letters = [
         "إلى من أحب وأعشق.. عيونكِ هي أماني بهالدنيا، وكل ما أحس بضيق أتذكر ضحكتكِ وأرتاح.",
         "أنتِ مو بس حبيبتي، أنتِ راحتي وملجئي اللي أهرب له من تعب هالعالم.",
@@ -189,8 +186,9 @@ def load_data():
         "أنتِ النور الذي ينير عتمة أيامي، دمتِ لي حباً لا ينتهي."
     ]
 
-    verses = (["﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ﴾", "﴿قُلْ أَعُوذُ بِرَبِّ النَّاسِ﴾"], 
-              ["﴿إِنَّ مَعَ الْعُسْرِ يُسْرًا﴾", "﴿وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ﴾", "﴿وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ﴾"])
+    # الآيات: الجزء الثابت والآيات الاختيارية العشوائية
+    fixed_verses = ["﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ﴾", "﴿قُلْ أَعُوذُ بِرَبِّ النَّاسِ﴾"]
+    random_pool = ["﴿إِنَّ مَعَ الْعُسْرِ يُسْرًا﴾", "﴿وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ﴾", "﴿وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ﴾", "﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾"]
     
     azkar = [
         "أَصْبَحْنَا وَأَصْبَحَ المُلْكُ لِلَّهِ وَالحَمْدُ لِلَّهِ، لا إلَهَ إلَّا اللَّهُ وَحْدَهُ لا شَرِيكَ له.",
@@ -198,15 +196,19 @@ def load_data():
         "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ.",
         "حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ ۖ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ (٧ مرات)."
     ]
-    return quotes, advices, letters, verses, azkar
+    return quotes, advices, letters, fixed_verses, random_pool, azkar
 
-quotes, advices, letters, verses, azkar = load_data()
+quotes, advices, letters, fixed_verses, random_pool, azkar = load_data()
+
+# ====== وظيفة توليد الآيات لضمان عمل زر التحديث بشكل سليم ======
+def generate_new_verses():
+    return fixed_verses + random.sample(random_pool, 2)
 
 # ====== إدارة الـ Session State ======
 if "daily_quote" not in st.session_state: st.session_state.daily_quote = random.choice(quotes)
 if "daily_advice" not in st.session_state: st.session_state.daily_advice = random.choice(advices)
 if "love_letter" not in st.session_state: st.session_state.love_letter = random.choice(letters)
-if "daily_verses" not in st.session_state: st.session_state.daily_verses = verses[0] + random.sample(verses[1], 2)
+if "daily_verses" not in st.session_state: st.session_state.daily_verses = generate_new_verses()
 if "daily_azkar" not in st.session_state: st.session_state.daily_azkar = random.sample(azkar, 2)
 
 # ====== أنماط CSS والمؤثرات البصرية ======
@@ -270,12 +272,14 @@ with tabs[0]:
     with col1:
         st.markdown(f"<div class='box inspire-box'><h3 style='text-align: center; color:#00ffcc !important;'>💡 كلام من القلب لكِ <span class='code-badge'>247</span></h3><p class='motivational-text'>\"{st.session_state.daily_quote}\"</p></div>", unsafe_allow_html=True)
     with col2:
+        # تحويل القائمة المعالجة في Session State إلى نصوص مفصولة بسطر
         verses_html = "<br>".join([f"<b>{i+1}.</b> {v}" for i, v in enumerate(st.session_state.daily_verses)])
         st.markdown(f"<div class='box inspire-box'><div class='dua-header'>إني خرجت من حولي وقوتي ودخلت في حولك وقوتك يا الله</div><p class='quran-text'>{verses_html}</p></div>", unsafe_allow_html=True)
     
+    # الزر بعد التحديث وإصلاح العطل
     if st.button("🔄 تحديث العبارات والآيات الآن"):
         st.session_state.daily_quote = random.choice(quotes)
-        st.session_state.daily_verses = verses[0] + random.sample(verses[1], 2)
+        st.session_state.daily_verses = generate_new_verses()  # يتم توليد قائمة جديدة فوراً هنا
         st.rerun()
 
 with tabs[1]:
@@ -298,4 +302,4 @@ with tabs[3]:
         st.rerun()
 
 st.markdown("<hr style='border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px;'>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #5c6878; font-size: 13px;'>تم التطوير بواسطة شيماء علي عبد الحسين | v1.9 | 247</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #5c6878; font-size: 13px;'>تم التطوير بواسطة شيماء علي عبد الحسين | v2.0 | 247</p>", unsafe_allow_html=True)
