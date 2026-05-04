@@ -1,10 +1,11 @@
 import streamlit as st
 import random
+import urllib.parse
 
 # ====== الإعدادات والهوية البصرية ======
 st.set_page_config(page_title="منصة الإلهام والتذكير | 247", layout="wide", page_icon="✨")
 
-# ====== بنك البيانات والعبارات ======
+# ====== بنك البيانات والعبارات كاملة وبدون اختصار ======
 @st.cache_data
 def load_data():
     quotes = [
@@ -100,7 +101,7 @@ def load_data():
         "ثقي أن تعبكِ اليوم هو الذي سيبني لكِ غداً مشرقاً.",
         "أنتِ نجمة تضيء في سماء الإبداع والتفوق، فلا تنطفئي.",
         "لا تلتفتي للمستحيل، بل اصنعي الممكن بجهدكِ وصبركِ.",
-        "كلما زاد التحدي، زادت فرحة الانتصار والوصول للقمة.",
+        "كلما زاد التحدي, زادت فرحة الانتصار والوصول للقمة.",
         "أنتِ قادرة على تحقيق التوازن والنجاح في حياتكِ.",
         "الاجتهاد هو الجسر الذي يربط بين أحلامكِ وواقعكِ.",
         "أنتِ تستحقين كل التقدير على جهدكِ وصبركِ الطويل.",
@@ -186,23 +187,37 @@ def load_data():
         "أنتِ النور الذي ينير عتمة أيامي، دمتِ لي حباً لا ينتهي."
     ]
 
-    # الآيات: الجزء الثابت والآيات الاختيارية العشوائية
-    fixed_verses = ["﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ﴾", "﴿قُلْ أَعُوذُ بِرَبِّ النَّاسِ﴾"]
-    random_pool = ["﴿إِنَّ مَعَ الْعُسْرِ يُسْرًا﴾", "﴿وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ﴾", "﴿وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ﴾", "﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾"]
+    # الآيات الثابتة
+    fixed_verses = [
+        "﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ﴾",
+        "﴿قُلْ أَعُوذُ بِرَبِّ النَّاسِ﴾"
+    ]
+    
+    # بنك الآيات المتغيرة
+    random_pool = [
+        "﴿إِنَّ مَعَ الْعُسْرِ يُسْرًا﴾",
+        "﴿وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ﴾",
+        "﴿وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ﴾",
+        "﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾",
+        "﴿إِنَّ اللَّهَ مَعَ الصَّابِرِينَ﴾",
+        "﴿وَاصْبِرْ لِحُكْمِ رَبِّكَ فَإِنَّكَ بِأَعْيُنِنَا﴾"
+    ]
     
     azkar = [
         "أَصْبَحْنَا وَأَصْبَحَ المُلْكُ لِلَّهِ وَالحَمْدُ لِلَّهِ، لا إلَهَ إلَّا اللَّهُ وَحْدَهُ لا شَرِيكَ له.",
         "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي شَأْنِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ.",
         "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ.",
-        "حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ ۖ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ (٧ مرات)."
+        "حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ ۖ وَهو رَبُّ الْعَرْشِ الْعَظِيمِ (٧ مرات)."
     ]
     return quotes, advices, letters, fixed_verses, random_pool, azkar
 
 quotes, advices, letters, fixed_verses, random_pool, azkar = load_data()
 
-# ====== وظيفة توليد الآيات لضمان عمل زر التحديث بشكل سليم ======
+# ====== دالة التوليد لضمان إخراج 4 آيات (2 ثابتة + 2 يتم تحديثها إجبارياً) ======
 def generate_new_verses():
-    return fixed_verses + random.sample(random_pool, 2)
+    # سحب آيتين عشوائيتين جديدتين بالكامل في كل مرة يتم استدعاء الدالة
+    dynamic_verses = random.sample(random_pool, 2)
+    return fixed_verses + dynamic_verses
 
 # ====== إدارة الـ Session State ======
 if "daily_quote" not in st.session_state: st.session_state.daily_quote = random.choice(quotes)
@@ -211,95 +226,143 @@ if "love_letter" not in st.session_state: st.session_state.love_letter = random.
 if "daily_verses" not in st.session_state: st.session_state.daily_verses = generate_new_verses()
 if "daily_azkar" not in st.session_state: st.session_state.daily_azkar = random.sample(azkar, 2)
 
-# ====== أنماط CSS والمؤثرات البصرية ======
+# ====== أنماط CSS والتحكم المتطور بالألوان ======
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-    html, body, [class*="css"] { font-family: 'Cairo', sans-serif; background-color: #0a0c10; box-sizing: border-box; }
+    html, body, [class*="css"] { font-family: 'Cairo', sans-serif; background-color: #0b0f19; box-sizing: border-box; }
     @keyframes fadeInUp { from { opacity: 0; transform: translate3d(0, 20px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
-    h1 { color: #00ffcc !important; text-align: center; font-weight: 700; text-shadow: 0px 0px 15px rgba(0, 255, 204, 0.4); }
-    .stButton>button { 
-        background: linear-gradient(45deg, #00ffcc, #0055ff); color: white !important; border-radius: 12px; border: none; font-weight: bold; width: 100%;
-        padding: 12px; font-size: 16px; transition: all 0.3s ease; box-shadow: 0px 4px 15px rgba(0, 85, 255, 0.3);
-    }
-    .stButton>button:hover { background: linear-gradient(45deg, #00ffaa, #0033cc); transform: translateY(-3px); box-shadow: 0px 6px 20px rgba(0, 255, 204, 0.5); color: #ffffff !important; }
     
+    /* تنسيق الهيدر والبادج */
+    h1 { color: #00ffcc !important; text-align: center; font-weight: 700; text-shadow: 0px 0px 15px rgba(0, 255, 204, 0.4); }
+    .code-badge { font-size: 13px; background-color: #00ffcc; color: #0b0f19; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
+
+    /* أزرار التحديث الموحدة */
+    .stButton>button { 
+        background: linear-gradient(45deg, #00ffcc, #0088ff); color: #ffffff !important; border-radius: 12px; border: none; font-weight: bold; width: 100%;
+        padding: 12px; font-size: 16px; transition: all 0.3s ease; box-shadow: 0px 4px 15px rgba(0, 136, 255, 0.25);
+    }
+    .stButton>button:hover { background: linear-gradient(45deg, #00ffaa, #0055cc); transform: translateY(-3px); box-shadow: 0px 6px 20px rgba(0, 255, 204, 0.4); color: #ffffff !important; }
+    
+    /* نظام الصناديق المتناسق بالألوان */
     .box { 
-        padding: 25px; 
-        border-radius: 16px; 
-        margin-bottom: 20px; 
+        padding: 28px; 
+        border-radius: 18px; 
+        margin-bottom: 22px; 
         text-align: right; 
         min-height: 250px; 
         height: auto; 
         box-sizing: border-box;
-        box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); 
-        backdrop-filter: blur(4px); 
+        box-shadow: 0 10px 30px 0 rgba(0,0,0,0.35); 
+        backdrop-filter: blur(8px); 
         animation: fadeInUp 0.8s ease-in-out; 
-        transition: transform 0.3s; 
+        transition: transform 0.3s ease, box-shadow 0.3s ease; 
     }
-    .box:hover { transform: scale(1.01); }
+    .box:hover { transform: translateY(-4px); }
     
-    .inspire-box { background: linear-gradient(135deg, rgba(30,33,48,0.8), rgba(12,35,51,0.8)); border: 1px solid #00ffcc; }
-    .warm-box { background: linear-gradient(135deg, rgba(43,27,23,0.8), rgba(26,15,13,0.8)); border: 1px solid #ff7b54; }
-    .love-box { background: linear-gradient(135deg, rgba(45,20,44,0.8), rgba(28,9,27,0.8)); border: 1px solid #ff2e63; }
-    .azkar-box { background: linear-gradient(135deg, rgba(16,44,41,0.8), rgba(10,26,24,0.8)); border: 1px solid #10b981; }
+    /* تدرجات ألوان الصناديق لتكون جذابة ومنظمة */
+    .inspire-box { background: linear-gradient(135deg, #131c31, #0d1322); border: 1px solid rgba(0, 255, 204, 0.3); box-shadow: 0 4px 20px rgba(0, 255, 204, 0.1); }
+    .warm-box { background: linear-gradient(135deg, #24191c, #160f11); border: 1px solid rgba(255, 123, 84, 0.3); box-shadow: 0 4px 20px rgba(255, 123, 84, 0.1); }
+    .love-box { background: linear-gradient(135deg, #281425, #170b16); border: 1px solid rgba(255, 46, 99, 0.3); box-shadow: 0 4px 20px rgba(255, 46, 99, 0.1); }
+    .azkar-box { background: linear-gradient(135deg, #0f2522, #081513); border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1); }
+    .complaint-box { background: linear-gradient(135deg, #161e2e, #0e131d); border: 1px solid rgba(0, 136, 204, 0.3); box-shadow: 0 4px 20px rgba(0, 136, 204, 0.1); }
     
-    .stTabs [data-baseweb="tab-list"] { gap: 12px; justify-content: center; }
-    .stTabs [data-baseweb="tab"] { height: 50px; background-color: #161a24; border-radius: 10px 10px 0px 0px; color: #888; font-weight: 700; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s; padding: 10px 20px; }
-    .stTabs [aria-selected="true"] { background-color: #1e2330 !important; color: #00ffcc !important; border-bottom: 3px solid #00ffcc !important; }
+    /* التبويبات المتطورة */
+    .stTabs [data-baseweb="tab-list"] { gap: 14px; justify-content: center; }
+    .stTabs [data-baseweb="tab"] { height: 52px; background-color: #121824; border-radius: 12px 12px 0px 0px; color: #7b8a9c; font-weight: 700; border: 1px solid rgba(255,255,255,0.03); transition: all 0.3s ease; padding: 10px 24px; }
+    .stTabs [aria-selected="true"] { background-color: #1a2333 !important; color: #00ffcc !important; border-bottom: 3px solid #00ffcc !important; }
     
-    .quran-text { font-size: 16px; color: #ffbb00; line-height: 1.8; font-weight: bold; }
-    .motivational-text { font-size: 17px; color: #00ffcc; line-height: 1.6; }
-    .warm-text { font-size: 18px; color: #ff9f80; line-height: 1.8; }
-    .love-text { font-size: 19px; color: #ff5e7e; line-height: 1.8; font-style: italic; }
-    .azkar-text { font-size: 17px; color: #34d399; line-height: 1.8; }
+    /* نصوص الأقسام وتلوينها الدقيق */
+    .motivational-text { font-size: 18px; color: #e2f1ff; line-height: 1.7; font-weight: 400; }
+    .quran-text { font-size: 17px; color: #ffd166; line-height: 1.9; font-weight: 700; text-align: center; }
+    .warm-text { font-size: 18px; color: #ffb499; line-height: 1.8; }
+    .love-text { font-size: 18px; color: #ff85a1; line-height: 1.8; font-style: italic; }
+    .azkar-text { font-size: 17px; color: #6ee7b7; line-height: 1.8; }
     
-    .dua-header { color: #00ffcc; font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 12px; border-bottom: 1px dashed rgba(0, 255, 204, 0.4); padding-bottom: 8px; }
-    .code-badge { font-size: 13px; background-color: #00ffcc; color: #0e1117; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
+    .dua-header { color: #00ffcc; font-size: 15px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px dashed rgba(0, 255, 204, 0.25); padding-bottom: 10px; }
+    
+    /* زر الإرسال المباشر */
+    .support-link {
+        display: block; width: 100%; text-align: center; background: linear-gradient(45deg, #0088cc, #00aaff); color: #ffffff !important; 
+        padding: 14px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 16px; 
+        margin-top: 15px; transition: all 0.3s; box-shadow: 0px 4px 15px rgba(0, 136, 204, 0.3);
+    }
+    .support-link:hover { background: linear-gradient(45deg, #0099ee, #33c2ff); transform: translateY(-2px); box-shadow: 0px 6px 20px rgba(0, 136, 204, 0.5); text-decoration: none; }
 </style>
 """, unsafe_allow_html=True)
 
 # ====== الهيدر ======
 st.markdown("<h1>✨ منصة الإلهام والتذكير <span class='code-badge'>247</span></h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #8a99ad; margin-top: -10px;'>مساحتكِ الخاصة للهدوء النفسي والطمأنينة</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #8a99ad; margin-top: -8px; font-size:15px;'>مساحتكِ الخاصة للهدوء النفسي والطمأنينة</p>", unsafe_allow_html=True)
 
 # ====== واجهة التبويبات ======
-tabs = st.tabs(["💡 قسم الإلهام والذكر", "🌿 قسم الأذكار اليومية", "💖 قسم النصائح الدافئة", "💌 رسائل حب واطمئنان"])
+tabs = st.tabs(["💡 قسم الإلهام والذكر", "🌿 قسم الأذكار اليومية", "💖 قسم النصائح الدافئة", "💌 رسائل حب واطمئنان", "🛠️ قسم الشكاوى"])
 
 with tabs[0]:
-    st.markdown("<h3 style='color:#00ffcc; text-align:center;'>🕊️ جرعة تفاؤل وذكر</h3>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color:#00ffcc; text-align:center; margin-bottom:15px;'>🕊️ جرعة تفاؤل وذكر</h4>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown(f"<div class='box inspire-box'><h3 style='text-align: center; color:#00ffcc !important;'>💡 كلام من القلب لكِ <span class='code-badge'>247</span></h3><p class='motivational-text'>\"{st.session_state.daily_quote}\"</p></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='box inspire-box'><h3 style='text-align: center; color:#00ffcc !important;'>💡 كلام من القلب لكِ</h3><p class='motivational-text'>\"{st.session_state.daily_quote}\"</p></div>", unsafe_allow_html=True)
     with col2:
-        # تحويل القائمة المعالجة في Session State إلى نصوص مفصولة بسطر
-        verses_html = "<br>".join([f"<b>{i+1}.</b> {v}" for i, v in enumerate(st.session_state.daily_verses)])
+        # عرض الأربع آيات (آيتين ثابتتين + آيتين عشوائيتين تتحدث إجبارياً)
+        verses_html = "<br><br>".join([f"<b>{i+1}.</b> {v}" for i, v in enumerate(st.session_state.daily_verses)])
         st.markdown(f"<div class='box inspire-box'><div class='dua-header'>إني خرجت من حولي وقوتي ودخلت في حولك وقوتك يا الله</div><p class='quran-text'>{verses_html}</p></div>", unsafe_allow_html=True)
     
-    # الزر بعد التحديث وإصلاح العطل
+    # عند الضغط هنا، تتحدث آيتين بشكل إجباري
     if st.button("🔄 تحديث العبارات والآيات الآن"):
         st.session_state.daily_quote = random.choice(quotes)
-        st.session_state.daily_verses = generate_new_verses()  # يتم توليد قائمة جديدة فوراً هنا
+        st.session_state.daily_verses = generate_new_verses()
         st.rerun()
 
 with tabs[1]:
     azkar_html = "<br><br>".join([f"• {a}" for a in st.session_state.daily_azkar])
-    st.markdown(f"<div class='box azkar-box'><h3 style='text-align: center; color: #10b981 !important;'>🌿 أذكار اليوم لراحة بالكِ <span class='code-badge'>247</span></h3><p class='azkar-text'>{azkar_html}</p></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='box azkar-box'><h3 style='text-align: center; color: #10b981 !important;'>🌿 أذكار اليوم لراحة بالكِ</h3><p class='azkar-text'>{azkar_html}</p></div>", unsafe_allow_html=True)
     if st.button("🔄 قراءة أذكار أخرى"):
         st.session_state.daily_azkar = random.sample(azkar, 2)
         st.rerun()
 
 with tabs[2]:
-    st.markdown(f"<div class='box warm-box'><h3 style='text-align: center; color: #ff7b54 !important;'>💌 رسالة خاصة لعيونكِ <span class='code-badge'>247</span></h3><p class='warm-text'>\"{st.session_state.daily_advice}\"</p></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='box warm-box'><h3 style='text-align: center; color: #ff7b54 !important;'>💌 رسالة خاصة لعيونكِ</h3><p class='warm-text'>\"{st.session_state.daily_advice}\"</p></div>", unsafe_allow_html=True)
     if st.button("💝 استلام نصيحة دافئة جديدة"):
         st.session_state.daily_advice = random.choice(advices)
         st.rerun()
 
 with tabs[3]:
-    st.markdown(f"<div class='box love-box'><h3 style='text-align: center; color: #ff2e63 !important;'>💘 رسالة حب واطمئنان <span class='code-badge'>247</span></h3><p class='love-text'>\"{st.session_state.love_letter}\"</p></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='box love-box'><h3 style='text-align: center; color: #ff2e63 !important;'>💘 رسالة حب واطمئنان</h3><p class='love-text'>\"{st.session_state.love_letter}\"</p></div>", unsafe_allow_html=True)
     if st.button("💖 قراءة رسالة حب جديدة"):
         st.session_state.love_letter = random.choice(letters)
         st.rerun()
 
+# ====== قسم الشكاوى (الرقم مخفي بالكامل في الواجهة) ======
+with tabs[4]:
+    st.markdown("<h4 style='color:#00ffcc; text-align:center; margin-bottom:15px;'>🛠️ إدارة الشكاوى والملاحظات</h4>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='box complaint-box'>
+        <h3 style='text-align: center; color: #0088cc !important;'>📩 أرسل ملاحظتك أو شكواك</h3>
+        <p style='color: #a5b4fc; font-size: 15px; text-align: center;'>
+        أهلاً بكِ في قسم الدعم والشكاوى. يمكنكِ كتابة أي مشكلة تواجهكِ في المنصة وإرسالها مباشرة لضمان متابعتها وحلها فوراً.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.form("complaint_form", clear_on_submit=True):
+        u_name = st.text_input("الأسم (اختياري)", placeholder="اكتبِ اسمكِ هنا...")
+        u_message = st.text_area("تفاصيل الشكوى أو الملاحظة", placeholder="اكتبِ تفاصيل المشكلة أو الرسالة هنا...")
+        submit_form = st.form_submit_button("تحضير الشكوى")
+        
+        if submit_form:
+            if u_message.strip():
+                # تجهيز النص وتشفيره للرابط
+                full_text = f"شكوى جديدة من منصة 247:\nالاسم: {u_name if u_name else 'غير معروف'}\nالرسالة:\n{u_message}"
+                encoded_msg = urllib.parse.quote(full_text)
+                
+                # استخدام رابط التليجرام الآمن برقمك دون عرضه
+                telegram_url = f"https://t.me/+9647822169684?text={encoded_msg}"
+                
+                st.markdown(f'<a href="{telegram_url}" target="_blank" class="support-link">📲 قدّم الشكوى</a>', unsafe_allow_html=True)
+                st.success("تم تجهيز الرسالة بنجاح! اضغطي على زر 'قدّم الشكوى' بالأعلى للتوجيه المباشر.")
+            else:
+                st.warning("يرجى كتابة تفاصيل الشكوى أولاً.")
+
 st.markdown("<hr style='border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px;'>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #5c6878; font-size: 13px;'>تم التطوير بواسطة شيماء علي عبد الحسين | v2.0 | 247</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #5c6878; font-size: 13px;'>تم التطوير بواسطة شيماء علي عبد الحسين | v2.2 | 247</p>", unsafe_allow_html=True)
