@@ -2,17 +2,17 @@ import streamlit as st
 import random
 import urllib.parse
 
-# ====== 1. الإعدادات الأساسية والهوية البصرية ======
+# ====== 1. الإعدادات الكبرى للمنصة ======
 st.set_page_config(
-    page_title="منصة الإلهام والتذكير | 247", 
+    page_title="منصة 247 | المجلد الكامل", 
     layout="wide", 
-    page_icon="✨"
+    page_icon="👑"
 )
 
-# ====== 2. بنك البيانات الضخم ======
+# ====== 2. بنك البيانات العملاق (بدون أي نقص نهائياً) ======
 @st.cache_data
-def load_all_data():
-    # عبارات تحفيزية للدراسة والقوة
+def load_mega_database():
+    # 100 عبارة تحفيز ودراسة
     quotes = [
         "تذكري دايمًا إن هذي التعب والمواقف الصعبة هي اللي راح تصنع منكِ إنسانة قوية.",
         "الدراسة هي سلاحكِ وسندكِ بهالدنيا، وكل ساعة تعب وسهر بتخليكِ مستقلة.",
@@ -116,7 +116,7 @@ def load_all_data():
         "اجعلي من نجاحكِ اليوم بداية لنجاحات أكبر في المستقبل."
     ]
 
-    # نصائح دافئة للراحة النفسية
+    # 40 نصيحة نفسية
     advices = [
         "حبيبتي، لا تقسين على نفسكِ، تعبتي هواية وتستاهلين شوية حنان من ذاتكِ.",
         "لما تحسين الدنيا قفلت بوجهكِ، تعالي ارتاحي واشربي شي دافي.",
@@ -160,7 +160,7 @@ def load_all_data():
         "دمتِ قوية ومشرقة، ونحن جميعاً فخورون بما تقدمينه وتحققينه."
     ]
 
-    # رسائل حب واطمئنان
+    # 30 رسالة حب
     letters = [
         "إلى من أحب وأعشق.. عيونكِ هي أماني بهالدنيا، وكل ما أحس بضيق أتذكر ضحكتكِ وأرتاح.",
         "أنتِ مو بس حبيبتي، أنتِ راحتي وملجئي اللي أهرب له من تعب هالعالم.",
@@ -194,135 +194,140 @@ def load_all_data():
         "أنتِ النور الذي ينير عتمة أيامي، دمتِ لي حباً لا ينتهي."
     ]
 
-    fixed_verses = [
-        "﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ﴾",
-        "﴿قُلْ أَعُوذُ بِرَبِّ النَّاسِ﴾"
+    # 70 آية قرآنية متغيرة
+    dynamic_verses = [
+        "﴿إِنَّ مَعَ الْعُسْرِ يُسْرًا﴾", "﴿وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ﴾", "﴿وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ﴾",
+        "﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾", "﴿إِنَّ اللَّهَ مَعَ الصَّابِرِينَ﴾", "﴿وَاصْبِرْ لِحُكْمِ رَبِّكَ فَإِنَّكَ بِأَعْيُنِنَا﴾",
+        "﴿وَقُل رَّبِّ زِدْنِي عِلْمًا﴾", "﴿فَإِنَّ مَعَ الْعُسْرِ يُسْرًا﴾", "﴿ادْعُونِي أَسْتَجِبْ لَكُمْ﴾",
+        "﴿إِنَّ اللَّهَ لَا يُخْلِفُ الْمِيعَادَ﴾", "﴿فَاصْبِرْ صَبْرًا جَمِيلًا﴾", "﴿لَا تَدْرِي لَعَلَّ اللَّهَ يُحْدِثُ بَعْدَ ذَٰلِكَ أَمْرًا﴾",
+        "﴿وَاللَّهُ يَعْلَمُ وَأَنتُمْ لَا تَعْلَمُونَ﴾", "﴿قُلِ اللَّهُ يُنَجِّيكُم مِّنْهَا وَمِن كُلِّ كَرْبٍ﴾", "﴿وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ﴾",
+        "﴿لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا﴾", "﴿فَإِنِّي قَرِيبٌ﴾", "﴿أَلَيْسَ اللَّهُ بِكَافٍ عَبْدَهُ﴾",
+        "﴿وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ﴾", "﴿إِنَّ رَحْمَتَ اللَّهِ قَرِيبٌ مِّنَ الْمُحْسِنِينَ﴾", "﴿قُلْ عَسَىٰ أَن يَكُونَ قَرِيبًا﴾",
+        "﴿وَتَوَكَّلْ عَلَى الْحَيِّ الَّذِي لَا يَمُوتُ﴾", "﴿رَبِّ لَا تَذَرْنِي فَرْدًا﴾", "﴿رَبِّ اشْرَحْ لِي صَدْرِي﴾",
+        "﴿وَيَسِّرْ لِي أَمْرِي﴾", "﴿وَاللَّهُ يَرْزُقُ مَن يَشَاءُ بِغَيْرِ حِسَابٍ﴾", "﴿وَاللَّهُ مَعَ الصَّابِرِينَ﴾",
+        "﴿إِنَّا لَا نُضِيعُ أَجْرَ مَنْ أَحْسَنَ عَمَلًا﴾", "﴿فَاصْبِرْ إِنَّ وَعْدَ اللَّهِ حَقٌّ﴾", "﴿وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ﴾",
+        "﴿إِنَّ اللَّهَ غَفُورٌ رَّحِيمٌ﴾", "﴿وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ﴾", "﴿سَيَجْعَلُ اللَّهُ بَعْدَ عُسْرٍ يُسْرًا﴾",
+        "﴿وَمَا كَانَ رَبُّكَ نَسِيًّا﴾", "﴿وَآتَاكُم مِّن كُلِّ مَا سَأَلْتُمُوهُ﴾", "﴿إِنَّ رَبِّي لَسَمِيعُ الدُّعَاءِ﴾",
+        "﴿وَلَا تَحْزَنْ إِنَّا مُنَجُوكَ﴾", "﴿وَأُفَوِّضُ أَمْرِي إِلَى اللَّهِ﴾", "﴿إِنَّ اللَّهَ بَصِيرٌ بِالْعِبَادِ﴾",
+        "﴿لَا تَخَفْ وَلَا تَحْزَنْ﴾", "﴿إِنَّا مَعَكُمْ مُّسْتَمِعُونَ﴾", "﴿وَهُوَ الْغَفُورُ الْوَدُودُ﴾",
+        "﴿وَمَا رَبُّكَ بِغَافِلٍ عَمَّا تَعْمَلُونَ﴾", "﴿إِنَّ اللَّهَ يُحِبُّ الْمُتَوَكِّلِينَ﴾", "﴿رَبَّنَا آتِنَا مِن لَّدُنكَ رَحْمَةً﴾",
+        "﴿وَهَيِّئْ لَنَا مِنْ أَمْرِنَا رَشَدًا﴾", "﴿فَاسْتَجَبْنَا لَهُ﴾", "﴿وَنَجَّيْنَاهُ مِنَ الْغَمِّ﴾",
+        "﴿وَكَذَٰلِكَ نُنجِي الْمُؤْمِنِينَ﴾", "﴿أَنِّي مَسَّنِيَ الضُّرُّ وَأَنتَ أَرْحَمُ الرَّاحِمِينَ﴾", "﴿لَا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ﴾",
+        "﴿إِنِّي كُنتُ مِنَ الظَّالِمِينَ﴾", "﴿وَقُل رَّبِّ أَنزِلْنِي مُنزَلًا مُّبَارَكًا﴾", "﴿وَأَنتَ خَيْرُ الْمُنزِلِينَ﴾",
+        "﴿رَبِّ هَبْ لِي مِن لَّدُنكَ ذُرِّيَّةً طَيِّبَةً﴾", "﴿إِنَّكُ سَمِيعُ الدُّعَاءِ﴾", "﴿رَبِّ هَبْ لِي حُكْمًا﴾",
+        "﴿وَأَلْحِقْنِي بِالصَّالِحِينَ﴾", "﴿رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ﴾", "﴿رَبَّنَا وَتَقَبَّلْ دُعَاءِ﴾",
+        "﴿رَبَّنَا اغْفِرْ لِي وَلِوَالِدَيَّ﴾", "﴿وَلِلْمُؤْمِنِينَ يَوْمَ يَقُومُ الْحِسَابُ﴾", "﴿إِنَّ اللَّهَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ﴾",
+        "﴿فَاللَّهُ خَيْرٌ حَافِظًا﴾", "﴿وَهُوَ أَرْحَمُ الرَّاحِمِينَ﴾", "﴿لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ﴾",
+        "﴿وَمَا ذَٰلِكَ عَلَى اللَّهِ بِعَزِيزٍ﴾", "﴿إِنَّ اللَّهَ لَطِيفٌ خَبِيرٌ﴾", "﴿وَأَحْسِنُوا ۛ إِنَّ اللَّهَ يُحِبُّ الْمُحْسِنِينَ﴾",
+        "﴿نَصْرٌ مِّنَ اللَّهِ وَفَتْحٌ قَرِيبٌ﴾"
     ]
-    random_pool = [
-        "﴿إِنَّ مَعَ الْعُسْرِ يُسْرًا﴾",
-        "﴿وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ﴾",
-        "﴿وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ﴾",
-        "﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾",
-        "﴿إِنَّ اللَّهَ مَعَ الصَّابِرِينَ﴾",
-        "﴿وَاصْبِرْ لِحُكْمِ رَبِّكَ فَإِنَّكَ بِأَعْيُنِنَا﴾"
-    ]
-    azkar = [
-        "أَصْبَحْنَا وَأَصْبَحَ المُلْكُ لِلَّهِ وَالحَمْدُ لِلَّهِ، لا إلَهَ إلَّا اللَّهُ وَحْدَهُ لا شَرِيكَ له.",
-        "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي شَأْنِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ.",
-        "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ.",
-        "حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ ۖ وَهو رَبُّ الْعَرْشِ الْعَظِيمِ (٧ مرات)."
-    ]
-    return quotes, advices, letters, fixed_verses, random_pool, azkar
 
-quotes, advices, letters, fixed_verses, random_pool, azkar = load_all_data()
+    return quotes, advices, letters, dynamic_verses
 
-# ====== 3. دوال المنطق البرمجي ======
-def get_random_verses():
-    dynamic = random.sample(random_pool, 2)
-    return fixed_verses + dynamic
+quotes, advices, letters, dynamic_verses = load_mega_database()
 
-# تهيئة الحالة
-if "daily_quote" not in st.session_state: st.session_state.daily_quote = random.choice(quotes)
-if "daily_advice" not in st.session_state: st.session_state.daily_advice = random.choice(advices)
-if "love_letter" not in st.session_state: st.session_state.love_letter = random.choice(letters)
-if "daily_verses" not in st.session_state: st.session_state.daily_verses = get_random_verses()
-if "daily_azkar" not in st.session_state: st.session_state.daily_azkar = random.sample(azkar, 2)
-
-# ====== 4. التنسيق الجمالي (CSS) ======
+# ====== 3. التصميم البصري (CSS) ======
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-    html, body, [class*="css"] { font-family: 'Cairo', sans-serif; background-color: #0b111e; color: white; }
     
-    .main-title { color: #00ffcc; text-align: center; font-size: 38px; font-weight: 700; text-shadow: 0 0 15px rgba(0, 255, 204, 0.3); margin-bottom: 25px; }
-    
-    .content-card {
-        background: #1a2333;
-        border: 1px solid #2d3748;
-        border-radius: 20px;
-        padding: 25px;
-        text-align: right;
-        min-height: 200px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        margin-bottom: 15px;
-        transition: 0.3s;
-    }
-    .content-card:hover { transform: translateY(-5px); border-color: #00ffcc; }
-    
-    .card-title { color: #00ffcc; font-size: 20px; font-weight: 700; margin-bottom: 15px; }
-    .card-text { font-size: 18px; line-height: 1.8; color: #e2e8f0; }
-    .quran-style { text-align: center; font-weight: 700; color: #ffd166; font-size: 20px; }
-    
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; justify-content: center; }
-    .stTabs [data-baseweb="tab"] { background: #1a2333; color: #94a3b8; border-radius: 10px 10px 0 0; padding: 10px 20px; }
-    .stTabs [aria-selected="true"] { color: #00ffcc !important; border-bottom: 2px solid #00ffcc !important; }
+    html, body, [class*="css"] { font-family: 'Cairo', sans-serif; background-color: #0b111e; color: #e2e8f0; }
+    .stApp { background: linear-gradient(135deg, #0b111e 0%, #1a2333 100%); }
 
-    .stButton>button {
-        width: 100%; border-radius: 12px; background: linear-gradient(45deg, #00ffcc, #0088ff);
-        color: white; border: none; font-weight: bold; height: 50px;
-    }
+    /* الكروت */
+    .card { background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 25px; margin-bottom: 20px; text-align: right; backdrop-filter: blur(15px); }
+    .card-fixed-quran { border: 2px solid #ffd166; background: rgba(255, 209, 102, 0.05); }
+    .card-fixed-dua { border: 2px solid #00ffcc; text-align: center; color: #00ffcc; font-size: 24px; font-weight: bold; }
+    .card-dynamic-quran { border-right: 5px solid #ffd166; text-align: center; }
+
+    .title-gold { color: #ffd166; font-size: 26px; font-weight: bold; margin-bottom: 15px; text-align: center; }
+    .quran-text { font-size: 24px; font-weight: bold; line-height: 1.8; color: #ffffff; }
     
-    .tg-btn {
-        display: block; width: 100%; padding: 12px; background: #0088cc; color: white !important;
-        text-align: center; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 15px;
-    }
-    .tg-btn:hover { background: #00aaff; }
+    /* الأزرار */
+    .stButton>button { background: linear-gradient(90deg, #00ffcc, #0088ff); color: white; border-radius: 12px; height: 55px; width: 100%; border: none; font-weight: bold; font-size: 18px; }
+    .stButton>button:hover { box-shadow: 0 0 20px rgba(0, 255, 204, 0.4); filter: brightness(1.1); }
 </style>
 """, unsafe_allow_html=True)
 
-# ====== 5. واجهة المستخدم ======
-st.markdown("<h1 class='main-title'>✨ منصة الإلهام والتذكير 247</h1>", unsafe_allow_html=True)
+# ====== 4. بناء الواجهة ======
+st.markdown("<h1 style='text-align:center; color:#00ffcc; text-shadow: 0 0 15px #00ffcc;'>✨ منصة الإلهام 247 | الإصدار الأضخم</h1>", unsafe_allow_html=True)
 
-t1, t2, t3, t4, t5 = st.tabs(["💡 الإلهام", "🌿 الأذكار", "💖 نصائح", "💌 رسائل", "🛠️ الشكاوى"])
+# إدارة الحالة (للتغيير العشوائي)
+if "quote" not in st.session_state: st.session_state.quote = random.choice(quotes)
+if "advice" not in st.session_state: st.session_state.advice = random.choice(advices)
+if "letter" not in st.session_state: st.session_state.letter = random.choice(letters)
+if "v_pair" not in st.session_state: st.session_state.v_pair = random.sample(dynamic_verses, 2)
 
-with t1:
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(f"<div class='content-card'><div class='card-title'>💡 كلام من القلب لكِ</div><p class='card-text'>\"{st.session_state.daily_quote}\"</p></div>", unsafe_allow_html=True)
-    with col2:
-        v_text = "<br>".join(st.session_state.daily_verses)
-        st.markdown(f"<div class='content-card'><div class='card-title' style='text-align:center;'>📖 آيات وذكر</div><p class='quran-style'>{v_text}</p></div>", unsafe_allow_html=True)
+tab1, tab2, tab3, tab4 = st.tabs(["💡 الرئيسية", "🌿 الروحانيات (الثوابت والمتغيرات)", "💖 المشاعر", "🛠️ الإدارة"])
+
+with tab1:
+    st.markdown(f"""
+    <div class='card' style='border-right: 5px solid #00ffcc;'>
+        <div style='color:#00ffcc; font-size:24px; font-weight:bold; margin-bottom:10px;'>💡 إلهام اليوم</div>
+        <p style='font-size:22px;'>{st.session_state.quote}</p>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("🔄 تجديد الإلهام اليومي"):
+        st.session_state.quote = random.choice(quotes)
+        st.rerun()
+
+with tab2:
+    # 1. آية الكرسي الثابتة
+    st.markdown("""
+    <div class='card card-fixed-quran'>
+        <div class='title-gold'>📖 آية الكرسي</div>
+        <p class='quran-text' style='text-align:center;'>﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ﴾</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 2. دعاء الحول والقوة الثابت
+    st.markdown("""
+    <div class='card card-fixed-dua'>
+        "اللهم إني خرجت من حولي وقوتي ودخلت في حولك وقوتك يا ذا القوة المتين"
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 3. آيتين متغيرتين
+    st.markdown("<div class='title-gold' style='margin-top:20px;'>📖 آيات مريحة للقلب (متغيرات)</div>", unsafe_allow_html=True)
+    col_v1, col_v2 = st.columns(2)
+    with col_v1:
+        st.markdown(f"<div class='card card-dynamic-quran'><p class='quran-text' style='color:#ffd166;'>{st.session_state.v_pair[0]}</p></div>", unsafe_allow_html=True)
+    with col_v2:
+        st.markdown(f"<div class='card card-dynamic-quran'><p class='quran-text' style='color:#ffd166;'>{st.session_state.v_pair[1]}</p></div>", unsafe_allow_html=True)
+
+    if st.button("📖 استلام آيات قرآنية أخرى"):
+        st.session_state.v_pair = random.sample(dynamic_verses, 2)
+        st.rerun()
+
+with tab3:
+    st.markdown(f"""
+    <div class='card' style='border-right: 5px solid #ffb499;'>
+        <div style='color:#ffb499; font-size:24px; font-weight:bold; margin-bottom:10px;'>💖 نصيحة دافئة</div>
+        <p style='font-size:22px;'>{st.session_state.advice}</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    if st.button("🔄 تحديث"):
-        st.session_state.daily_quote = random.choice(quotes)
-        st.session_state.daily_verses = get_random_verses()
-        st.rerun()
-
-with t2:
-    z_text = "<br><br>".join([f"• {a}" for a in st.session_state.daily_azkar])
-    st.markdown(f"<div class='content-card'><div class='card-title'>🌿 أذكار لراحة بالكِ</div><p class='card-text' style='color:#6ee7b7;'>{z_text}</p></div>", unsafe_allow_html=True)
-    if st.button("🔄 أذكار أخرى"):
-        st.session_state.daily_azkar = random.sample(azkar, 2)
-        st.rerun()
-
-with t3:
-    st.markdown(f"<div class='content-card'><div class='card-title'>💖 نصيحة دافئة لكِ</div><p class='card-text' style='color:#ffb499;'>\"{st.session_state.daily_advice}\"</p></div>", unsafe_allow_html=True)
-    if st.button("💝 نصيحة جديدة"):
-        st.session_state.daily_advice = random.choice(advices)
-        st.rerun()
-
-with t4:
-    st.markdown(f"<div class='content-card'><div class='card-title'>💌 رسالة حب واطمئنان</div><p class='card-text' style='font-style:italic; color:#ff85a1;'>\"{st.session_state.love_letter}\"</p></div>", unsafe_allow_html=True)
-    if st.button("💘 رسالة جديدة"):
-        st.session_state.love_letter = random.choice(letters)
-        st.rerun()
-
-with t5:
-    st.markdown("<div class='content-card'><div class='card-title'>🤖 قسم الشكاوى (Telegram)</div><p style='font-size:15px;'>اكتبي شكواكِ هنا، واضغطي على الزر ليتم تحويلكِ إلى البوت لإرسالها.</p></div>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class='card' style='border-right: 5px solid #ff85a1;'>
+        <div style='color:#ff85a1; font-size:24px; font-weight:bold; margin-bottom:10px;'>💌 رسالة حب</div>
+        <p style='font-size:22px; font-style:italic;'>{st.session_state.letter}</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    with st.form("complaint_form"):
-        u_name = st.text_input("اسمكِ (اختياري)")
-        u_msg = st.text_area("تفاصيل الشكوى")
-        submit = st.form_submit_button("تحضير الرسالة")
-        
-        if submit:
-            if u_msg.strip():
-                full_msg = f"شكوى جديدة من منصة 247:\nالاسم: {u_name if u_name else 'مجهول'}\nالرسالة: {u_msg}"
-                encoded = urllib.parse.quote(full_msg)
-                tg_link = f"https://t.me/Gold_2026_pro_bot?text={encoded}"
-                st.info("اضغطي على الزر أدناه لفتح التلجرام وإرسال الشكوى.")
-                st.markdown(f'<a href="{tg_link}" target="_blank" class="tg-btn">🚀 إرسال عبر Telegram الآن</a>', unsafe_allow_html=True)
-            else:
-                st.warning("يرجى كتابة نص الشكوى.")
+    if st.button("💝 تحديث ركن المشاعر"):
+        st.session_state.advice = random.choice(advices)
+        st.session_state.letter = random.choice(letters)
+        st.rerun()
 
-st.markdown("<p style='text-align:center; color:#5c6878; font-size:12px; margin-top:50px;'>تم التطوير بواسطة شيماء علي عبد الحسين | 2026</p>", unsafe_allow_html=True)
+with tab4:
+    st.markdown("<div class='card' style='border-color:#0088cc;'><div style='color:#0088cc; font-size:24px; font-weight:bold;'>🤖 تواصل مع الإدارة</div><p>أرسلي استفساركِ أو شكواكِ وسيتم توجيهكِ مباشرة لبوت التلجرام.</p></div>", unsafe_allow_html=True)
+    with st.form("admin_contact"):
+        u_name = st.text_input("الأسم")
+        u_msg = st.text_area("نص الرسالة")
+        if st.form_submit_button("إرسال الآن"):
+            if u_msg:
+                full_text = f"📩 رسالة جديدة من المنصة:\nالمستخدم: {u_name}\nالرسالة: {u_msg}"
+                encoded_url = f"https://t.me/Gold_2026_pro_bot?text={urllib.parse.quote(full_text)}"
+                st.markdown(f'<a href="{encoded_url}" target="_blank" style="display:block; text-align:center; background:#0088cc; color:white; padding:15px; border-radius:12px; text-decoration:none; font-weight:bold;">🚀 اضغطي هنا للتأكيد عبر Telegram</a>', unsafe_allow_html=True)
+
+st.markdown("<br><p style='text-align:center; color:#5c6878;'>تم التطوير بواسطة شيماء علي عبد الحسين | 2026</p>", unsafe_allow_html=True)
